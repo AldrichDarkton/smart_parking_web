@@ -41,6 +41,7 @@ export default function PlateSearchBox() {
           className="grow"
           placeholder="Search plate number..."
           onChange={(e) => setSearchKey(e.target.value)}
+          value={searchKey}
         />
       </label>
       <AnimatePresence>

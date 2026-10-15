@@ -1,4 +1,3 @@
-import { useEffect, useState } from "react";
 import { NavLink } from "react-router-dom";
 import { motion } from "framer-motion";
 import logo from "../assets/logo_square.png";
@@ -48,9 +47,7 @@ const iconLineVariants = {
   closedBottom: { rotate: -45, y: -6 },
 };
 
-export default function SideBar() {
-  const [isOpen, setIsOpen] = useState(false);
-
+export default function SideBar({ isOpen, setIsOpen }) {
   const menuItems = [
     { to: "/dashboard", Icon: Grid2X2, label: "Overview" },
     { to: "/member_vehicles", Icon: CarFront, label: "Member Vehicles" },
@@ -59,29 +56,18 @@ export default function SideBar() {
 
   const zoneList = [
     {
-      to: "/zone/1",
+      to: "/zone/A",
       Icon: BoxSelectIcon,
       label: "Zone A",
       subTitle: "Open-air parking",
     },
     {
-      to: "/zone/2",
+      to: "/zone/B",
       Icon: BoxSelectIcon,
       label: "Zone B",
       subTitle: "Basement parking",
     },
   ];
-
-  useEffect(() => {
-    const handleResize = () => {
-      setIsOpen(window.innerWidth > 768);
-    };
-
-    handleResize();
-    window.addEventListener("resize", handleResize);
-
-    return () => window.removeEventListener("resize", handleResize);
-  }, []);
 
   return (
     <div className="flex flex-row-reverse bg-background justify-start items-start h-screen overflow-hidden w-fit">
@@ -143,7 +129,7 @@ export default function SideBar() {
               <span className="-mt-[3px]">TOTAL</span>
             </div>
             <div className="bg-background rounded-md inset-shadow-sm inset-shadow-gray-400/50 w-25 h-15 p-2 flex flex-col justify-center items-start">
-              <span className="text-lg font-bold text-primary">50</span>
+              <span className="text-lg font-bold text-primary">39</span>
               <span className="-mt-[3px]">AVAILABLE</span>
             </div>
           </motion.div>
