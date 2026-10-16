@@ -1,5 +1,6 @@
 import { Pencil, Search, Trash } from "lucide-react";
 import { useEffect, useState } from "react";
+import AccountForm from "../components/AccountForm";
 
 const personnel = [
   {
@@ -73,10 +74,16 @@ export default function AccountManagement() {
   const [searchKey, setSearchKey] = useState("");
   const [personnelList, setPersonnelList] = useState([]);
 
-  const handleSubmit = (e) => {
-    e.preventDefault();
-    console.log("Submitted");
-  };
+  const [currentPage, setCurrentPage] = useState(1);
+
+  const recordsPerPage = 10;
+  const totalPages = Math.ceil(personnelList.length / recordsPerPage);
+
+  const startIndex = (currentPage - 1) * recordsPerPage;
+  const currentRecords = personnelList.slice(
+    startIndex,
+    startIndex + recordsPerPage,
+  );
 
   useEffect(() => {
     const getPersonnel = async () => {
@@ -104,190 +111,216 @@ export default function AccountManagement() {
   }, [searchKey]);
 
   return (
-    <div className="flex flex-col items-center justify-start gap-4 w-full">
-      {/* Page header title */}
-      <div className="h-10 w-full flex justify-start items-center text-primary font-bold text-xl">
-        Account Administration
-      </div>
+    <>
+      <div className="flex px-1 flex-col items-center justify-start gap-4 w-full">
+        {/* Page header title */}
+        <div className="h-10 w-full flex justify-start items-center text-primary font-bold text-xl">
+          Account Administration
+        </div>
 
-      {/* Page description */}
-      <div className="flex flex-col items-start justify-center w-full">
-        <h1 className="text-xl font-bold">Account Management</h1>
-        <p className="text-md">
-          Create account for parking personnel and monitor active personnel
-        </p>
-      </div>
+        {/* Page description */}
+        <div className="flex flex-col items-start justify-center w-full">
+          <h1 className="text-xl font-bold">Account Management</h1>
+          <p className="text-md">
+            Create account for parking personnel and monitor active personnel
+          </p>
+        </div>
 
-      <div className="flex lg:grid gap-10 flex-col justify-start items-center lg:grid-cols-[400px_minmax(0,1fr)] w-full">
-        {/* Create Account Form Card */}
-        <div className="flex items-start justify-center h-full">
-          <div className="w-full sm:w-100 h-fit p-4 rounded-lg border-2 border-primary bg-card shadow-md">
-            {/* Form header */}
-            <div className="flex items-center justify-start gap-5">
-              <div className="w-10 h-10 flex items-center justify-center bg-primary-light rounded-lg">
-                <Pencil className="w-5 h-5 text-primary" aria-hidden="true" />
+        <div className="flex gap-10 flex-col justify-start items-center  w-full">
+          {/* Active Personnel Section */}
+          <div className="flex flex-col w-full justify-start items-center h-full gap-5">
+            {/* Search box */}
+            <label className="input input-primary w-full shadow-md">
+              <Search className="w-5 h-5 text-primary" aria-hidden="true" />
+              <input
+                type="search"
+                required
+                placeholder="Enter Personnel Name..."
+                onChange={(e) => setSearchKey(e.target.value)}
+                value={searchKey}
+              />
+            </label>
+
+            {/* Personnel table container */}
+            <div className="flex flex-col border-2 w-full bg-card border-primary overflow-hidden h-fit rounded-lg shadow-md">
+              {/* Table Header Section */}
+              <div className="flex items-center w-full justify-between px-3 py-4 bg-card border-b-2 border-primary">
+                <div className="flex flex-col items-start justify-start gap-1">
+                  <span className="text-primary font-bold text-xl">
+                    Active Personnel
+                  </span>
+                  <span className="font-light text-xs">
+                    Accounts with current system access
+                  </span>
+                </div>
+                <button
+                  type="button"
+                  className="btn btn-primary"
+                  onClick={() =>
+                    document.getElementById("form-module").showModal()
+                  }
+                >
+                  Register
+                </button>
               </div>
-              <div className="flex flex-col items-start justify-center">
-                <span className="text-primary font-bold text-xl">
-                  Create Account
+
+              {/* Table content */}
+              <div className="overflow-x-auto max-h-80 rounded-box border border-base-content/5 bg-background">
+                <table className="table">
+                  {/* head */}
+                  <thead>
+                    <tr>
+                      <th></th>
+                      <th>Personnel</th>
+                      <th>Access Level</th>
+                      <th>Added Date</th>
+                      <th>Action</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {currentRecords
+                      .filter((person) =>
+                        person.username
+                          .toLowerCase()
+                          .includes(searchKey.toLowerCase()),
+                      )
+                      .map((person, index) => (
+                        <tr
+                          key={index}
+                          className="hover:bg-primary-light/20 cursor-pointer"
+                        >
+                          <th>{index + 1}</th>
+                          <td>
+                            <div className="flex items-center gap-3">
+                              <span className="w-7 h-7 rounded-md bg-primary-light text-primary flex items-center justify-center font-bold text-xs">
+                                {person.username.charAt(0)}
+                              </span>
+                              <span className="font-medium">
+                                {person.username}
+                              </span>
+                            </div>
+                          </td>
+                          <td>
+                            <span
+                              className={`badge ${
+                                person.accessLevel === "Administrator"
+                                  ? "badge-primary badge-soft"
+                                  : "badge-neutral badge-soft"
+                              }`}
+                            >
+                              {person.accessLevel}
+                            </span>
+                          </td>
+                          <td>{person.addedDate}</td>
+                          <td className="flex items-center w-fit justify-start gap-5">
+                            <button
+                              type="button"
+                              className="btn btn-soft btn-primary"
+                              onClick={() =>
+                                document
+                                  .getElementById("form-module")
+                                  .showModal()
+                              }
+                            >
+                              <Pencil className="w-5 h-5" aria-hidden="true" />
+                              <span>Edit</span>
+                            </button>
+                            <button
+                              type="button"
+                              className="btn btn-soft btn-error"
+                              onClick={() =>
+                                document
+                                  .getElementById("delete_model")
+                                  .showModal()
+                              }
+                            >
+                              <Trash className="w-5 h-5" aria-hidden="true" />
+                              <span>Remove</span>
+                            </button>
+                          </td>
+                        </tr>
+                      ))}
+                  </tbody>
+                </table>
+              </div>
+              <div className="flex flex-col sm:flex-row items-center justify-between gap-3 border-t border-primary/20 px-4 py-3">
+                {/* Record count */}
+                <span className="text-sm text-base-content/70">
+                  Showing {personnelList.length === 0 ? 0 : startIndex + 1}–
+                  {Math.min(startIndex + recordsPerPage, personnelList.length)}{" "}
+                  of {personnelList.length} records
                 </span>
-                <span className="text-primary font-light text-xs">
-                  Set up credentials and access
-                </span>
+
+                {/* Page buttons */}
+                <div className="join">
+                  <button
+                    className="join-item btn btn-sm"
+                    disabled={currentPage === 1}
+                    onClick={() =>
+                      setCurrentPage((page) => Math.max(1, page - 1))
+                    }
+                    aria-label="Previous page"
+                  >
+                    «
+                  </button>
+
+                  {Array.from(
+                    { length: totalPages },
+                    (_, index) => index + 1,
+                  ).map((page) => (
+                    <button
+                      key={page}
+                      className={`join-item btn btn-sm ${
+                        currentPage === page ? "btn-primary" : ""
+                      }`}
+                      aria-current={currentPage === page ? "page" : undefined}
+                      onClick={() => setCurrentPage(page)}
+                    >
+                      {page}
+                    </button>
+                  ))}
+
+                  <button
+                    className="join-item btn btn-sm"
+                    disabled={currentPage === totalPages || totalPages === 0}
+                    onClick={() =>
+                      setCurrentPage((page) => Math.min(totalPages, page + 1))
+                    }
+                    aria-label="Next page"
+                  >
+                    »
+                  </button>
+                </div>
               </div>
             </div>
+          </div>
+        </div>
+      </div>
+      <dialog id="delete_model" className="modal">
+        <div className="modal-box">
+          <h3 className="font-bold text-lg">Delete Confirmation!</h3>
+          <p className="py-4">Are you sure you want to delete this account?</p>
+          <div className="modal-action">
+            <span className="btn btn-error">Delete</span>
 
-            {/* The actual form */}
-            <form
-              action="POST"
-              onSubmit={(e) => handleSubmit(e)}
-              className="flex flex-col w-full h-full py-3"
-            >
-              <fieldset className="fieldset w-full">
-                <label className="label font-bold" htmlFor="username">
-                  Username *
-                </label>
-                <input
-                  type="text"
-                  id="username"
-                  className="input input-primary w-full"
-                  placeholder="username"
-                  required
-                />
-              </fieldset>
-
-              <fieldset className="fieldset w-full">
-                <label className="label font-bold" htmlFor="temporary-password">
-                  Temporary Password *
-                </label>
-                <input
-                  type="password"
-                  id="temporary-password"
-                  className="input input-primary w-full"
-                  placeholder="Enter a secure password"
-                  required
-                />
-              </fieldset>
-
-              <fieldset className="fieldset w-full">
-                <label className="label font-bold" htmlFor="access-level">
-                  Access Level *
-                </label>
-                <select
-                  id="access-level"
-                  className="select select-primary w-full"
-                  defaultValue="Viewer"
-                >
-                  <option value="Viewer">Viewer</option>
-                  <option value="Administrator">Administrator</option>
-                </select>
-              </fieldset>
-
-              <div className="h-5"></div>
-
-              <button type="submit" className="btn btn-primary">
-                Add Personnel
-              </button>
+            <form method="dialog">
+              <button className="btn">Cancel</button>
             </form>
           </div>
         </div>
+        <form method="dialog" className="modal-backdrop">
+          <button>close</button>
+        </form>
+      </dialog>
 
-        {/* Active Personnel Section */}
-        <div className="flex flex-col w-full justify-start items-center h-full gap-5">
-          {/* Search box */}
-          <label className="input input-primary w-full shadow-md">
-            <Search className="w-5 h-5 text-primary" aria-hidden="true" />
-            <input
-              type="search"
-              required
-              placeholder="Enter Personnel Name..."
-              onChange={(e) => setSearchKey(e.target.value)}
-              value={searchKey}
-            />
-          </label>
-
-          {/* Personnel table container */}
-          <div className="flex flex-col border-2 w-full bg-card border-primary overflow-hidden h-fit rounded-lg shadow-md">
-            {/* Table Header Section */}
-            <div className="flex items-center w-full justify-between px-3 py-4 bg-card border-b-2 border-primary">
-              <div className="flex flex-col items-start justify-start gap-1">
-                <span className="text-primary font-bold text-xl">
-                  Active Personnel
-                </span>
-                <span className="font-light text-xs">
-                  Accounts with current system access
-                </span>
-              </div>
-              <div className="px-5 py-2 rounded-full bg-primary-light font-bold text-primary">
-                {personnelList.length} active
-              </div>
-            </div>
-
-            {/* Table content */}
-            <div className="overflow-x-auto max-h-80 rounded-box border border-base-content/5 bg-background">
-              <table className="table">
-                {/* head */}
-                <thead>
-                  <tr>
-                    <th></th>
-                    <th>Personnel</th>
-                    <th>Access Level</th>
-                    <th>Added Date</th>
-                    <th>Action</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {personnelList
-                    .filter((person) =>
-                      person.username
-                        .toLowerCase()
-                        .includes(searchKey.toLowerCase()),
-                    )
-                    .map((person, index) => (
-                      <tr
-                        key={index}
-                        className="hover:bg-primary-light/20 cursor-pointer"
-                      >
-                        <th>{index + 1}</th>
-                        <td>
-                          <div className="flex items-center gap-3">
-                            <span className="w-7 h-7 rounded-md bg-primary-light text-primary flex items-center justify-center font-bold text-xs">
-                              {person.username.charAt(0)}
-                            </span>
-                            <span className="font-medium">
-                              {person.username}
-                            </span>
-                          </div>
-                        </td>
-                        <td>
-                          <span
-                            className={`badge ${
-                              person.accessLevel === "Administrator"
-                                ? "badge-primary badge-soft"
-                                : "badge-neutral badge-soft"
-                            }`}
-                          >
-                            {person.accessLevel}
-                          </span>
-                        </td>
-                        <td>{person.addedDate}</td>
-                        <td>
-                          <button
-                            type="button"
-                            className="btn btn-soft btn-error"
-                          >
-                            <Trash className="w-5 h-5" aria-hidden="true" />
-                            <span>Remove</span>
-                          </button>
-                        </td>
-                      </tr>
-                    ))}
-                </tbody>
-              </table>
-            </div>
-          </div>
+      <dialog id="form-module" className=" modal ">
+        <div className="modal-box w-fit">
+          <AccountForm />
         </div>
-      </div>
-    </div>
+        <form method="dialog" className="modal-backdrop">
+          <button>close</button>
+        </form>
+      </dialog>
+    </>
   );
 }

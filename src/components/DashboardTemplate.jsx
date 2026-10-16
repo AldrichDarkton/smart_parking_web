@@ -24,7 +24,7 @@ export default function DashboardTemplate() {
         <SideBar isOpen={isOpen} setIsOpen={setIsOpen} />
       </div>
       <div
-        className={`w-full h-screen overflow-x-clip overflow-y-auto bg-background pe-10`}
+        className={`w-full h-screen overflow-x-clip overflow-y-auto bg-background pe-10 relative`}
       >
         {isOpen && hideMainOnOpen ? <></> : <Outlet />}
         <div className="h-10"></div>

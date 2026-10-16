@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { motion } from "framer-motion";
 import { useNavigate } from "react-router";
+import { MapPin, ParkingSquare, ArrowUpRight } from "lucide-react";
 
 export default function ZoneBlock({
   zoneName,
@@ -8,91 +9,120 @@ export default function ZoneBlock({
   zoneCapacity,
   zoneOccupied,
 }) {
-  const [isAvailable, setIsAvailable] = useState(true);
-
-  const occupiedPercent = ((zoneOccupied / zoneCapacity) * 100).toFixed(0);
-
   const navigate = useNavigate();
 
-  const handleNavigate = () => {
-    navigate(`/zone/${zoneName}`);
-  };
+  const isAvailable = zoneOccupied < zoneCapacity;
+  const freeSpots = Math.max(0, zoneCapacity - zoneOccupied);
+  const occupiedPercent =
+    zoneCapacity > 0
+      ? Math.min(100, Math.round((zoneOccupied / zoneCapacity) * 100))
+      : 0;
 
-  useEffect(() => {
-    const checkAvailability = async () => {
-      if (zoneOccupied === zoneCapacity) {
-        setIsAvailable(false);
-      }
-    };
+  const statusColor = isAvailable ? "text-primary" : "text-warning";
 
-    checkAvailability();
-  }, [zoneOccupied, zoneCapacity]);
+  const statusBg = isAvailable ? "bg-primary" : "bg-warning";
 
   return (
     <motion.div
-      whileHover={{
-        y: -4,
-        scale: 1.01,
-        boxShadow: "0 8px 5px rgba(0, 0, 0, 0.12)",
-      }}
-      transition={{
-        type: "spring",
-        stiffness: 300,
-        damping: 20,
-      }}
-      className={`flex items-center justify-start relative bg-card w-[98%] ${
-        isAvailable ? "border-primary" : "border-warning"
-      } border-2 rounded-lg shadow-lg cursor-pointer overflow-hidden`}
-      onClick={() => handleNavigate()}
+      whileHover={{ y: -5, scale: 1.015 }}
+      whileTap={{ scale: 0.98 }}
+      transition={{ type: "spring", stiffness: 300, damping: 22 }}
+      onClick={() => navigate(`/zone/${zoneName}`)}
+      className={`relative flex flex-col w-full min-w-0 overflow-hidden
+        rounded-xl border-2 bg-card shadow-md cursor-pointer
+        transition-shadow hover:shadow-xl
+        ${isAvailable ? "border-primary/40" : "border-warning/50"}`}
     >
+      {/* Colored header */}
       <div
-        className={`${isAvailable ? "bg-primary" : "bg-warning"}  flex-col relative items-center justify-center w-35 h-35 inset-shadow-sm inset-shadow-gray-900/80 sm:flex hidden`}
+        className={`${statusBg} relative flex flex-col items-center justify-center
+          min-h-36 px-4 py-5 text-card`}
       >
-        <span className="text-card text-xl text-center  font-light text-wrap">
-          ZONE
+        <span className="text-xs font-semibold tracking-[0.2em] opacity-80">
+          PARKING ZONE
         </span>
-        <span className="text-card text-4xl text-center  font-bold text-wrap">
+
+        <span className="text-6xl font-extrabold leading-tight">
           {zoneName}
         </span>
-        <div className="w-2 bg-card h-full absolute right-0 rounded-tl-lg rounded-bl-lg shadow-lg"></div>
+
+        <span className="mt-2 flex items-center gap-1.5 text-xs font-medium opacity-90">
+          <MapPin className="w-3.5 h-3.5" />
+          {zoneSubName}
+        </span>
+
+        {/* Decorative circle */}
+        <div className="absolute -right-8 -top-8 h-24 w-24 rounded-full border-8 border-white/10" />
+        <div className="absolute -bottom-10 -left-6 h-20 w-20 rounded-full border-8 border-white/10" />
       </div>
-      <div className="flex relative w-full h-35  flex-col justify-center items-start pe-2 ps-2 sm:ps-0">
+
+      {/* Status badge */}
+      <div className="flex justify-center -mt-3 relative z-10">
         <span
-          className={`text-xl font-bold ${isAvailable ? "text-primary" : "text-warning"}`}
+          className={`badge badge-lg border-2 border-card font-bold shadow-sm
+            ${isAvailable ? "bg-primary text-card" : "bg-warning text-card"}`}
         >
-          Zone {zoneName}
+          {isAvailable ? "AVAILABLE" : "FULL"}
         </span>
-        <span className="-mt-2">{zoneSubName}</span>
-        <span className="-mt-2">
-          Sports:{" "}
-          <span
-            className={`${isAvailable ? "text-primary" : "text-warning"} font-bold`}
-          >
-            {zoneCapacity}
-          </span>
-        </span>
-        <progress
-          className={`progress ${isAvailable ? "progress-primary" : "progress-warning"} w-full`}
-          value={zoneOccupied}
-          max={zoneCapacity}
-        ></progress>
-        <div className="flex items-center justify-between w-full">
-          <span className={`${isAvailable ? "text-primary" : "text-warning"} `}>
-            {occupiedPercent}% Occupied
-          </span>
-          <span
-            className={`${isAvailable ? "text-primary" : "text-warning"} flex items-center gap-1`}
-          >
-            <span className="font-semibold">
-              {zoneOccupied} / {zoneCapacity}
-            </span>
-            occupied
+      </div>
+
+      {/* Zone details */}
+      <div className="flex flex-col gap-4 p-4 pt-3">
+        {/* Capacity */}
+        <div className="flex items-center justify-between gap-2">
+          <div className="flex items-center gap-2 min-w-0">
+            <div className="flex items-center justify-center rounded-lg bg-primary/10 text-primary w-9 h-9 shrink-0">
+              <ParkingSquare className="w-5 h-5" />
+            </div>
+            <div className="min-w-0">
+              <p className="text-xs text-base-content/60">Total Capacity</p>
+              <p className="font-bold text-base-content">
+                {zoneCapacity} spots
+              </p>
+            </div>
+          </div>
+        </div>
+
+        {/* Occupancy summary */}
+        <div className="flex items-end justify-between gap-2">
+          <div>
+            <p className="text-xs text-base-content/60">Occupied</p>
+            <p className={`text-2xl font-extrabold ${statusColor}`}>
+              {zoneOccupied}
+              <span className="text-sm font-medium text-base-content/50">
+                {" "}
+                / {zoneCapacity}
+              </span>
+            </p>
+          </div>
+
+          <span className={`text-lg font-bold ${statusColor}`}>
+            {occupiedPercent}%
           </span>
         </div>
-        <div
-          className={`absolute right-0 top-0 ${isAvailable ? "bg-primary" : "bg-warning"} text-card w-30 h-10  items-center justify-center rounded-bl-lg inset-shadow-sm inset-shadow-gray-900/50 sm:flex hidden`}
-        >
-          {isAvailable ? "AVAILABLE" : "UNAVAILABLE"}
+
+        {/* Progress bar */}
+        <div className="flex flex-col gap-2">
+          <progress
+            className={`progress w-full ${
+              isAvailable ? "progress-primary" : "progress-warning"
+            }`}
+            value={occupiedPercent}
+            max={100}
+          />
+
+          <div className="flex justify-between text-xs text-base-content/60">
+            <span>Free spaces</span>
+            <span className={`font-bold ${statusColor}`}>{freeSpots}</span>
+          </div>
+        </div>
+
+        {/* View details */}
+        <div className="flex items-center justify-between border-t border-base-300 pt-3">
+          <span className="text-sm font-semibold text-base-content/70">
+            View zone details
+          </span>
+          <ArrowUpRight className="w-4 h-4 text-primary" />
         </div>
       </div>
     </motion.div>

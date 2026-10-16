@@ -7,6 +7,7 @@ import {
   CarFront,
   Grid2X2,
   LogOut,
+  Logs,
   User,
   UserCog2,
 } from "lucide-react";
@@ -50,6 +51,7 @@ const iconLineVariants = {
 export default function SideBar({ isOpen, setIsOpen }) {
   const menuItems = [
     { to: "/dashboard", Icon: Grid2X2, label: "Overview" },
+    { to: "/log_view", Icon: Logs, label: "Parking Log" },
     { to: "/member_vehicles", Icon: CarFront, label: "Member Vehicles" },
     { to: "/account_management", Icon: UserCog2, label: "Account Management" },
   ];

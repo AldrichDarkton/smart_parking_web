@@ -1,3 +1,4 @@
+import ActiveEntryMonitorList from "../components/ActiveEntryMonitorList";
 import CapacityProgressCard from "../components/CapacityProgressCard";
 import ZoneBlock from "../components/ZoneBlock";
 
@@ -28,23 +29,35 @@ export default function Dashboard() {
       </div>
       {/* The overall capacity section */}
       <CapacityProgressCard capacity={50} occupied={40} />
-      {/* The zone block list */}
-      <div className="flex flex-col items-center gap-4 justify-start w-full h-fit">
-        <span className="text-primary font-bold text-xl w-full">
-          Parking Zones
-        </span>
-        <ZoneBlock
-          zoneName={"A"}
-          zoneSubName="Open-air Parking"
-          zoneCapacity={30}
-          zoneOccupied={20}
-        />
-        <ZoneBlock
-          zoneName={"B"}
-          zoneSubName="Basement Parking"
-          zoneCapacity={20}
-          zoneOccupied={20}
-        />
+      <div className="grid grid-cols-1 gap-5 lg:grid-cols-2 w-full ">
+        {/* The zone block list */}
+        <div className="flex flex-col items-center gap-4 justify-start w-full  h-fit">
+          <span className="text-primary font-bold text-xl w-full">
+            Parking Zones
+          </span>
+          <div className="grid grid-cols-1 sm:grid-cols-2  gap-5 w-full px-1">
+            <ZoneBlock
+              zoneName={"A"}
+              zoneSubName="Open-air Parking"
+              zoneCapacity={30}
+              zoneOccupied={20}
+            />
+
+            <ZoneBlock
+              zoneName={"B"}
+              zoneSubName="Basement Parking"
+              zoneCapacity={20}
+              zoneOccupied={20}
+            />
+          </div>
+        </div>
+        {/* Live Parking List */}
+        <div className="flex flex-col items-center gap-4 justify-start w-full  h-fit">
+          <span className="text-primary font-bold text-xl w-full">
+            Live Activity
+          </span>
+          <ActiveEntryMonitorList />
+        </div>
       </div>
     </div>
   );

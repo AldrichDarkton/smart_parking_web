@@ -1,5 +1,6 @@
 import { Pencil, Search, Trash } from "lucide-react";
 import { useEffect, useState } from "react";
+import MemberForm from "../components/MemberForm";
 
 const vehicles = [
   {
@@ -91,10 +92,16 @@ export default function MemberManagement() {
   const [searchKey, setSearchKey] = useState("");
   const [vehicleList, setVehicleList] = useState([]);
 
-  const handleSubmit = (e) => {
-    e.preventDefault();
-    console.log("Submitted");
-  };
+  const [currentPage, setCurrentPage] = useState(1);
+
+  const recordsPerPage = 10;
+  const totalPages = Math.ceil(vehicleList.length / recordsPerPage);
+
+  const startIndex = (currentPage - 1) * recordsPerPage;
+  const currentRecords = vehicleList.slice(
+    startIndex,
+    startIndex + recordsPerPage,
+  );
 
   useEffect(() => {
     const getVehicles = async () => {
@@ -122,146 +129,189 @@ export default function MemberManagement() {
   }, [searchKey]);
 
   return (
-    <div className="flex flex-col items-center justify-start gap-4 w-full">
-      <div className="h-10 w-full flex justify-start items-center text-primary font-bold text-xl">
-        Member Vehicles
-      </div>
-      <div className="flex flex-col items-start justify-center w-full">
-        <h1 className="text-xl font-bold">VIP & Member Vehicles</h1>
-        <p className="text-md">Register vehicles with ongoing parking access</p>
-      </div>
-      <div className="flex lg:grid gap-10 flex-col justify-start items-center lg:grid-cols-[400px_minmax(0,1fr)] w-full ">
-        {/* Form card*/}
-        <div className="flex items-start justify-center h-full">
-          <div className="w-full sm:w-100 h-fit p-4 rounded-lg border-2 border-primary bg-card shadow-md">
-            {/* Form header */}
-            <div className="flex items-center justify-start gap-5">
-              <div className="w-10 h-10 flex items-center justify-center bg-primary-light rounded-lg">
-                <Pencil className="w-5 h-5 text-primary" aria-hidden="true" />
+    <>
+      <div className="flex flex-col items-center justify-start gap-4 w-full">
+        <div className="h-10 w-full flex justify-start items-center text-primary font-bold text-xl">
+          Member Vehicles
+        </div>
+        <div className="flex flex-col items-start justify-center w-full">
+          <h1 className="text-xl font-bold">VIP & Member Vehicles</h1>
+          <p className="text-md">
+            Register vehicles with ongoing parking access
+          </p>
+        </div>
+        <div className="flex px-1 gap-10 flex-col justify-start items-center w-full ">
+          {/* Table sec */}
+          <div className="flex flex-col w-full justify-start items-center h-full gap-5">
+            {/* Search box */}
+            <label className="input input-primary w-full shadow-md">
+              <Search className="w-5 h-5 text-primary" aria-hidden="true" />
+              <input
+                type="search"
+                required
+                placeholder="Enter License Plate..."
+                onChange={(e) => setSearchKey(e.target.value)}
+                value={searchKey}
+              />
+            </label>
+            {/* The actual table */}
+            <div className="flex flex-col border-2 w-full bg-card border-primary overflow-hidden h-fit rounded-lg shadow-md">
+              <div className="flex items-center w-full justify-between px-3 py-4 bg-card border-b-2 border-primary">
+                <div className="flex flex-col items-start justify-start gap-1">
+                  <span className="text-primary font-bold text-xl">
+                    Registered Vehicles
+                  </span>
+                  <span className=" font-light text-xs">
+                    Active VIP & Member Parking Permits
+                  </span>
+                </div>
+
+                <button
+                  type="button"
+                  className="btn btn-primary"
+                  onClick={() =>
+                    document.getElementById("form-module").showModal()
+                  }
+                >
+                  Register
+                </button>
               </div>
-              <div className="flex flex-col items-start justify-center">
-                <span className="text-primary font-bold text-xl">
-                  Vehicle Registration
+              <div className="overflow-x-auto max-h-80 rounded-box border border-base-content/5 bg-background">
+                <table className="table">
+                  {/* head */}
+                  <thead>
+                    <tr>
+                      <th></th>
+                      <th>License Plate</th>
+                      <th>Owner</th>
+                      <th>Registered Date</th>
+                      <th>Note</th>
+                      <th>Action</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {currentRecords.map((vehicle, index) => (
+                      <tr
+                        key={index}
+                        className="hover:bg-primary-light/20 cursor-pointer"
+                      >
+                        <th>{index + 1}</th>
+                        <th>
+                          <span className="badge badge-primary badge-soft">
+                            {vehicle.licensePlate}
+                          </span>
+                        </th>
+                        <td>{vehicle.owner}</td>
+                        <td>{vehicle.registeredDate}</td>
+                        <td>{vehicle.note}</td>
+                        <td className="flex items-center w-fit justify-start gap-5">
+                          <button
+                            type="button"
+                            className="btn btn-soft btn-primary"
+                            onClick={() =>
+                              document.getElementById("form-module").showModal()
+                            }
+                          >
+                            <Pencil className="w-5 h-5" aria-hidden="true" />
+                            <span>Edit</span>
+                          </button>
+                          <button
+                            type="button"
+                            className="btn btn-soft btn-error"
+                            onClick={() =>
+                              document
+                                .getElementById("delete_model")
+                                .showModal()
+                            }
+                          >
+                            <Trash className="w-5 h-5" aria-hidden="true" />
+                            <span>Remove</span>
+                          </button>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+              <div className="flex flex-col sm:flex-row items-center justify-between gap-3 border-t border-primary/20 px-4 py-3">
+                {/* Record count */}
+                <span className="text-sm text-base-content/70">
+                  Showing {vehicleList.length === 0 ? 0 : startIndex + 1}–
+                  {Math.min(startIndex + recordsPerPage, vehicleList.length)} of{" "}
+                  {vehicleList.length} records
                 </span>
-                <span className="text-primary font-light text-xs">
-                  Add a new VIP or Member vehicle
-                </span>
+
+                {/* Page buttons */}
+                <div className="join">
+                  <button
+                    className="join-item btn btn-sm"
+                    disabled={currentPage === 1}
+                    onClick={() =>
+                      setCurrentPage((page) => Math.max(1, page - 1))
+                    }
+                    aria-label="Previous page"
+                  >
+                    «
+                  </button>
+
+                  {Array.from(
+                    { length: totalPages },
+                    (_, index) => index + 1,
+                  ).map((page) => (
+                    <button
+                      key={page}
+                      className={`join-item btn btn-sm ${
+                        currentPage === page ? "btn-primary" : ""
+                      }`}
+                      aria-current={currentPage === page ? "page" : undefined}
+                      onClick={() => setCurrentPage(page)}
+                    >
+                      {page}
+                    </button>
+                  ))}
+
+                  <button
+                    className="join-item btn btn-sm"
+                    disabled={currentPage === totalPages || totalPages === 0}
+                    onClick={() =>
+                      setCurrentPage((page) => Math.min(totalPages, page + 1))
+                    }
+                    aria-label="Next page"
+                  >
+                    »
+                  </button>
+                </div>
               </div>
             </div>
-            {/* The actual form */}
-            <form
-              action="POST"
-              onSubmit={(e) => handleSubmit(e)}
-              className="flex flex-col w-full h-full py-3"
-            >
-              <fieldset className="fieldset w-full">
-                <label className="label font-bold" htmlFor="name">
-                  License Plate *
-                </label>
-                <input
-                  type="text"
-                  id="license-plate"
-                  className="input input-primary w-full"
-                  placeholder="XX - XXXX"
-                  required
-                />
-              </fieldset>
-              <fieldset className="fieldset w-full">
-                <label className="label font-bold" htmlFor="name">
-                  Owner Name *
-                </label>
-                <input
-                  type="text"
-                  id="owner-name"
-                  className="input input-primary w-full"
-                  placeholder="Full Name"
-                  required
-                />
-              </fieldset>
-              <fieldset className="fieldset">
-                <legend className="fieldset-legend">Note (Optional)</legend>
-                <textarea
-                  className="textarea h-24 w-full textarea-primary"
-                  placeholder="..."
-                ></textarea>
-              </fieldset>
-              <div className="h-5"></div>
-              <button type="submit" className="btn btn-primary">
-                Register Vehicles
-              </button>
+          </div>
+        </div>
+      </div>
+
+      <dialog id="delete_model" className="modal">
+        <div className="modal-box">
+          <h3 className="font-bold text-lg">Delete Confirmation!</h3>
+          <p className="py-4">Are you sure you want to delete this member?</p>
+          <div className="modal-action">
+            <span className="btn btn-error">Delete</span>
+
+            <form method="dialog">
+              <button className="btn">Cancel</button>
             </form>
           </div>
         </div>
-        {/* Table sec */}
-        <div className="flex flex-col w-full justify-start items-center h-full gap-5">
-          {/* Search box */}
-          <label className="input input-primary w-full shadow-md">
-            <Search className="w-5 h-5 text-primary" aria-hidden="true" />
-            <input
-              type="search"
-              required
-              placeholder="Enter License Plate..."
-              onChange={(e) => setSearchKey(e.target.value)}
-              value={searchKey}
-            />
-          </label>
-          {/* The actual table */}
-          <div className="flex flex-col border-2 w-full bg-card border-primary overflow-hidden h-fit rounded-lg shadow-md">
-            <div className="flex items-center w-full justify-between px-3 py-4 bg-card border-b-2 border-primary">
-              <div className="flex flex-col items-start justify-start gap-1">
-                <span className="text-primary font-bold text-xl">
-                  Registered Vehicles
-                </span>
-                <span className=" font-light text-xs">
-                  Active VIP & Member Parking Permits
-                </span>
-              </div>
-              <div className="px-5 py-2 rounded-full bg-primary-light font-bold text-primary">
-                {vehicleList.length} active
-              </div>
-            </div>
-            <div className="overflow-x-auto max-h-80 rounded-box border border-base-content/5 bg-background">
-              <table className="table">
-                {/* head */}
-                <thead>
-                  <tr>
-                    <th></th>
-                    <th>License Plate</th>
-                    <th>Owner</th>
-                    <th>Registered Date</th>
-                    <th>Note</th>
-                    <th>Action</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {vehicleList.map((vehicle, index) => (
-                    <tr
-                      key={index}
-                      className="hover:bg-primary-light/20 cursor-pointer"
-                    >
-                      <th>{index + 1}</th>
-                      <th>
-                        <span className="badge badge-primary badge-soft">
-                          {vehicle.licensePlate}
-                        </span>
-                      </th>
-                      <td>{vehicle.owner}</td>
-                      <td>{vehicle.registeredDate}</td>
-                      <td>{vehicle.note}</td>
-                      <td>
-                        <button className="btn btn-soft btn-error">
-                          <Trash className="w-5 h-5" aria-hidden="true" />
-                          <span>Remove</span>
-                        </button>
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          </div>
+        <form method="dialog" className="modal-backdrop">
+          <button>close</button>
+        </form>
+      </dialog>
+
+      <dialog id="form-module" className=" modal ">
+        <div className="modal-box w-fit">
+          <MemberForm />
         </div>
-      </div>
-    </div>
+        <form method="dialog" className="modal-backdrop">
+          <button>close</button>
+        </form>
+      </dialog>
+    </>
   );
 }
