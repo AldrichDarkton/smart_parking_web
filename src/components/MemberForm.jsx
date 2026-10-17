@@ -1,9 +1,25 @@
 import { CarFront } from "lucide-react";
+import { useEffect, useState } from "react";
 
 export default function MemberForm() {
+  const [plateNumber, setPlateNumber] = useState("");
+  const [ownerName, setOwnerName] = useState("");
+  const [note, setNote] = useState("");
+
   const handleSubmit = (e) => {
     e.preventDefault();
-    console.log("Submitted");
+    const formData = {
+      plate_number: plateNumber,
+      owner_name: ownerName,
+      note: note,
+    };
+    console.log(formData);
+  };
+
+  const resetData = () => {
+    setPlateNumber("");
+    setOwnerName("");
+    setNote("");
   };
 
   return (
@@ -38,6 +54,9 @@ export default function MemberForm() {
             className="input input-primary w-full"
             placeholder="XX - XXXX"
             required
+            value={plateNumber}
+            onChange={(e) => setPlateNumber(e.target.value)}
+            onFocus={(e) => e.target.select()}
           />
         </fieldset>
         <fieldset className="fieldset w-full">
@@ -50,6 +69,9 @@ export default function MemberForm() {
             className="input input-primary w-full"
             placeholder="Full Name"
             required
+            value={ownerName}
+            onChange={(e) => setOwnerName(e.target.value)}
+            onFocus={(e) => e.target.select()}
           />
         </fieldset>
         <fieldset className="fieldset">
@@ -57,11 +79,21 @@ export default function MemberForm() {
           <textarea
             className="textarea h-24 w-full textarea-primary"
             placeholder="..."
+            value={note}
+            onChange={(e) => setNote(e.target.value)}
+            onFocus={(e) => e.target.select()}
           ></textarea>
         </fieldset>
         <div className="h-5"></div>
         <button type="submit" className="btn btn-primary">
           Register Vehicles
+        </button>
+        <button
+          type="button"
+          onClick={() => resetData()}
+          className="btn btn-accent mt-3"
+        >
+          Clear
         </button>
       </form>
     </div>

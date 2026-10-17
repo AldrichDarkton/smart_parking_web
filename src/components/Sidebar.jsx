@@ -11,11 +11,14 @@ import {
   User,
   UserCog2,
 } from "lucide-react";
+import { useEffect, useState } from "react";
 
-// const sidebarVariants = {
-//   open: { transform: "translateX(0%)" },
-//   closed: { transform: "translateX(-100%)" },
-// };
+const tempData = {
+  total_spots: 5,
+  occupied_spots: 3,
+  available_spots: 2,
+  is_full: false,
+};
 
 const sidebarVariants = {
   open: {
@@ -49,6 +52,25 @@ const iconLineVariants = {
 };
 
 export default function SideBar({ isOpen, setIsOpen }) {
+  const [overviewData, setOverviewData] = useState({
+    total_spots: 0,
+    occupied_spots: 0,
+    available_spots: 0,
+    is_full: false,
+  });
+
+  useEffect(() => {
+    const initializeData = async () => {
+      try {
+        setOverviewData(tempData);
+      } catch (error) {
+        console.error("Error fetching data:", error);
+      }
+    };
+
+    initializeData();
+  }, []);
+
   const menuItems = [
     { to: "/dashboard", Icon: Grid2X2, label: "Overview" },
     { to: "/log_view", Icon: Logs, label: "Parking Log" },
@@ -127,11 +149,15 @@ export default function SideBar({ isOpen, setIsOpen }) {
             className="flex items-center justify-around px-2 py-3 w-full gap-1 border-b-2 border-primary"
           >
             <div className="bg-background rounded-md inset-shadow-sm inset-shadow-gray-400/50 w-25 h-15 p-2 flex flex-col justify-center items-start">
-              <span className="text-lg font-bold text-primary">50</span>
+              <span className="text-lg font-bold text-primary">
+                {overviewData.total_spots}
+              </span>
               <span className="-mt-[3px]">TOTAL</span>
             </div>
             <div className="bg-background rounded-md inset-shadow-sm inset-shadow-gray-400/50 w-25 h-15 p-2 flex flex-col justify-center items-start">
-              <span className="text-lg font-bold text-primary">39</span>
+              <span className="text-lg font-bold text-primary">
+                {overviewData.available_spots}
+              </span>
               <span className="-mt-[3px]">AVAILABLE</span>
             </div>
           </motion.div>

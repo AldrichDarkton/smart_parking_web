@@ -2,29 +2,7 @@ import { useEffect, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { CarFront, Clock3, ParkingCircle, Radio } from "lucide-react";
 
-const parkingRecords = [
-  {
-    licensePlate: "4C-3245",
-    entry: "16/10/2026 08:15",
-    exit: null,
-    duration: "1h 27m",
-    status: "FINDING SLOT",
-  },
-  {
-    licensePlate: "5H-3532",
-    entry: "16/10/2026 08:30",
-    exit: null,
-    duration: "1h 19m",
-    status: "FINDING SLOT",
-  },
-  {
-    licensePlate: "2B-7814",
-    entry: "16/10/2026 07:45",
-    exit: null,
-    duration: "2h 35m",
-    status: "FINDING SLOT",
-  },
-];
+const parkingRecords = [];
 
 export default function ActiveEntryMonitorList() {
   const [parkingLog, setParkingLog] = useState([]);

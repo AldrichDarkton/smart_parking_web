@@ -1,4 +1,3 @@
-import { useEffect, useState } from "react";
 import { motion } from "framer-motion";
 import { useNavigate } from "react-router";
 import { MapPin, ParkingSquare, ArrowUpRight } from "lucide-react";
@@ -42,7 +41,7 @@ export default function ZoneBlock({
           PARKING ZONE
         </span>
 
-        <span className="text-6xl font-extrabold leading-tight">
+        <span className="text-5xl font-extrabold text-center leading-tight">
           {zoneName}
         </span>
 

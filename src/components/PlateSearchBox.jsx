@@ -6,21 +6,28 @@ import PlateDetails from "./PlateDetails";
 export default function PlateSearchBox() {
   const [searchKey, setSearchKey] = useState("");
   const [result, setResult] = useState(null);
+  const [validationMsg, setValidationMsg] = useState(null);
   const [isSearching, setIsSearching] = useState(false);
 
   useEffect(() => {
     // If input is cleared, reset states immediately and exit
     if (!searchKey.trim()) {
       setIsSearching(false);
+      setValidationMsg(null);
       setResult(null);
       return;
     }
-
     setIsSearching(true);
 
     const handler = setTimeout(async () => {
       try {
-        // This is where i'll call the search method
+        if (searchKey.trim().length != 7) {
+          setResult(null);
+          setValidationMsg("Invalid plate number");
+        } else {
+          setResult("#A03");
+          // This is where i'll call the search method
+        }
       } catch (error) {
         console.error("Search failed:", error);
       } finally {
@@ -37,7 +44,7 @@ export default function PlateSearchBox() {
     <>
       <div className="flex flex-col items-center gap-1 justify-start">
         <label className="input input-primary">
-          <Search className="w-5 h-5 text-primary" />
+          <Search className="w-5 h-5 text-primary" aria-hidden="true" />
           <input
             type="text"
             className="grow"
@@ -61,9 +68,15 @@ export default function PlateSearchBox() {
               ) : (
                 <span className="loading loading-spinner bg-primary loading-sm" />
               )}
-              <span>#A03 </span>
+              {isSearching ? (
+                <span className="loading loading-dots loading-xs text-primary"></span>
+              ) : (
+                <span>
+                  {validationMsg && !result ? validationMsg : result}{" "}
+                </span>
+              )}
 
-              {!isSearching && (
+              {!isSearching && result && (
                 <span
                   className="btn btn-link btn-primary absolute right-0 top-[50%] translate-y-[-50%]"
                   onClick={() =>
