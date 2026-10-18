@@ -4,76 +4,111 @@ import { Car, ImageIcon, SquareParking } from "lucide-react";
 import CapacityProgressCard from "../components/CapacityProgressCard";
 
 // Temp data
-const zoneDataList = [
-  {
-    zoneName: "A",
-    zoneSubName: "Open-air Parking",
-    zoneMap: null,
-    zoneCapacity: 30,
-    zoneOccupied: 20,
-    parkingSlots: [
-      { slotNo: "#A01", occupied: true },
-      { slotNo: "#A02", occupied: false },
-      { slotNo: "#A03", occupied: true },
-      { slotNo: "#A04", occupied: true },
-      { slotNo: "#A05", occupied: false },
-      { slotNo: "#A06", occupied: true },
-      { slotNo: "#A07", occupied: false },
-      { slotNo: "#A08", occupied: true },
-      { slotNo: "#A09", occupied: true },
-      { slotNo: "#A10", occupied: true },
-      { slotNo: "#A11", occupied: false },
-      { slotNo: "#A12", occupied: true },
-      { slotNo: "#A13", occupied: false },
-      { slotNo: "#A14", occupied: true },
-      { slotNo: "#A15", occupied: true },
-      { slotNo: "#A16", occupied: false },
-      { slotNo: "#A17", occupied: true },
-      { slotNo: "#A18", occupied: true },
-      { slotNo: "#A19", occupied: false },
-      { slotNo: "#A20", occupied: true },
-      { slotNo: "#A21", occupied: true },
-      { slotNo: "#A22", occupied: false },
-      { slotNo: "#A23", occupied: true },
-      { slotNo: "#A24", occupied: true },
-      { slotNo: "#A25", occupied: false },
-      { slotNo: "#A26", occupied: true },
-      { slotNo: "#A27", occupied: false },
-      { slotNo: "#A28", occupied: true },
-      { slotNo: "#A29", occupied: true },
-      { slotNo: "#A30", occupied: false },
-    ],
+// const zoneDataList = [
+//   {
+//     zoneName: "A",
+//     zoneSubName: "Open-air Parking",
+//     zoneMap: null,
+//     zoneCapacity: 30,
+//     zoneOccupied: 20,
+//     parkingSlots: [
+//       { slotNo: "#A01", occupied: true },
+//       { slotNo: "#A02", occupied: false },
+//       { slotNo: "#A03", occupied: true },
+//       { slotNo: "#A04", occupied: true },
+//       { slotNo: "#A05", occupied: false },
+//       { slotNo: "#A06", occupied: true },
+//       { slotNo: "#A07", occupied: false },
+//       { slotNo: "#A08", occupied: true },
+//       { slotNo: "#A09", occupied: true },
+//       { slotNo: "#A10", occupied: true },
+//       { slotNo: "#A11", occupied: false },
+//       { slotNo: "#A12", occupied: true },
+//       { slotNo: "#A13", occupied: false },
+//       { slotNo: "#A14", occupied: true },
+//       { slotNo: "#A15", occupied: true },
+//       { slotNo: "#A16", occupied: false },
+//       { slotNo: "#A17", occupied: true },
+//       { slotNo: "#A18", occupied: true },
+//       { slotNo: "#A19", occupied: false },
+//       { slotNo: "#A20", occupied: true },
+//       { slotNo: "#A21", occupied: true },
+//       { slotNo: "#A22", occupied: false },
+//       { slotNo: "#A23", occupied: true },
+//       { slotNo: "#A24", occupied: true },
+//       { slotNo: "#A25", occupied: false },
+//       { slotNo: "#A26", occupied: true },
+//       { slotNo: "#A27", occupied: false },
+//       { slotNo: "#A28", occupied: true },
+//       { slotNo: "#A29", occupied: true },
+//       { slotNo: "#A30", occupied: false },
+//     ],
+//   },
+//   {
+//     zoneName: "B",
+//     zoneSubName: "Basement Parking",
+//     zoneMap: null,
+//     zoneCapacity: 20,
+//     zoneOccupied: 20,
+//     parkingSlots: [
+//       { slotNo: "#B01", occupied: true },
+//       { slotNo: "#B02", occupied: true },
+//       { slotNo: "#B03", occupied: true },
+//       { slotNo: "#B04", occupied: true },
+//       { slotNo: "#B05", occupied: true },
+//       { slotNo: "#B06", occupied: true },
+//       { slotNo: "#B07", occupied: true },
+//       { slotNo: "#B08", occupied: true },
+//       { slotNo: "#B09", occupied: true },
+//       { slotNo: "#B10", occupied: true },
+//       { slotNo: "#B11", occupied: true },
+//       { slotNo: "#B12", occupied: true },
+//       { slotNo: "#B13", occupied: true },
+//       { slotNo: "#B14", occupied: true },
+//       { slotNo: "#B15", occupied: true },
+//       { slotNo: "#B16", occupied: true },
+//       { slotNo: "#B17", occupied: true },
+//       { slotNo: "#B18", occupied: true },
+//       { slotNo: "#B19", occupied: true },
+//       { slotNo: "#B20", occupied: true },
+//     ],
+//   },
+// ];
+
+const zoneDataList = {
+  "Zone A": {
+    total: 3,
+    free: 2,
+    slots: {
+      A1: "occupied",
+      A2: "free",
+      A3: "free",
+      // A4: "occupied",
+      // A5: "free",
+      // A6: "free",
+      // A7: "occupied",
+      // A8: "free",
+      // A9: "free",
+      // A10: "occupied",
+      // A11: "free",
+      // A12: "free",
+      // A13: "occupied",
+      // A14: "free",
+      // A15: "free",
+      // A16: "occupied",
+      // A17: "free",
+      // A18: "free",
+    },
   },
-  {
-    zoneName: "B",
-    zoneSubName: "Basement Parking",
-    zoneMap: null,
-    zoneCapacity: 20,
-    zoneOccupied: 20,
-    parkingSlots: [
-      { slotNo: "#B01", occupied: true },
-      { slotNo: "#B02", occupied: true },
-      { slotNo: "#B03", occupied: true },
-      { slotNo: "#B04", occupied: true },
-      { slotNo: "#B05", occupied: true },
-      { slotNo: "#B06", occupied: true },
-      { slotNo: "#B07", occupied: true },
-      { slotNo: "#B08", occupied: true },
-      { slotNo: "#B09", occupied: true },
-      { slotNo: "#B10", occupied: true },
-      { slotNo: "#B11", occupied: true },
-      { slotNo: "#B12", occupied: true },
-      { slotNo: "#B13", occupied: true },
-      { slotNo: "#B14", occupied: true },
-      { slotNo: "#B15", occupied: true },
-      { slotNo: "#B16", occupied: true },
-      { slotNo: "#B17", occupied: true },
-      { slotNo: "#B18", occupied: true },
-      { slotNo: "#B19", occupied: true },
-      { slotNo: "#B20", occupied: true },
-    ],
+  "Zone B": {
+    total: 2,
+    free: 1,
+    slots: {
+      B1: "occupied",
+      B2: "free",
+    },
   },
-];
+};
 
 export default function ZoneDetails() {
   const { zoneId } = useParams();
@@ -85,7 +120,7 @@ export default function ZoneDetails() {
     }
 
     const findZoneInfo = async () => {
-      const zoneData = zoneDataList.find((zone) => zone.zoneName === zoneId);
+      const zoneData = zoneDataList[zoneId];
 
       setZoneInfo(zoneData ?? {});
     };
@@ -96,12 +131,10 @@ export default function ZoneDetails() {
   return (
     <div className="flex flex-col items-center justify-start gap-4 w-full">
       <div className="h-10 w-full flex flex-col justify-center items-start ">
-        <span className="text-primary font-bold text-xl">
-          Zone {zoneInfo.zoneName}
-        </span>
-        <span className="text-primary font-light text-xs -mt-2">
+        <span className="text-primary font-bold text-xl">{zoneId}</span>
+        {/* <span className="text-primary font-light text-xs -mt-2">
           {zoneInfo.zoneSubName}
-        </span>
+        </span> */}
       </div>
       {/* Map & Overview */}
       <div className="grid w-full grid-cols-1 gap-5 lg:grid-cols-[minmax(0,1.6fr)_minmax(260px,1fr)]">
@@ -110,7 +143,7 @@ export default function ZoneDetails() {
           {zoneInfo.zoneMap ? (
             <img
               src={zoneInfo.zoneMap}
-              alt={`Zone ${zoneInfo.zoneName} parking map`}
+              alt={`Zone ${zoneId} parking map`}
               className="h-full w-full object-contain"
             />
           ) : (
@@ -124,31 +157,31 @@ export default function ZoneDetails() {
         {/* Overview Cards */}
         <div className="grid w-full grid-cols-1 gap-3 sm:grid-cols-3 lg:grid-cols-1 lg:gap-4">
           <OverviewCard
-            value={zoneInfo.zoneCapacity ?? 0}
+            value={zoneInfo.total ?? 0}
             title="Total Slots"
             subtitle="Parking spaces"
           />
 
           <OverviewCard
-            value={(zoneInfo.zoneCapacity ?? 0) - (zoneInfo.zoneOccupied ?? 0)}
+            value={zoneInfo.free ?? 0}
             title="Available Slots"
             subtitle="Ready for parking"
-            isFull={zoneInfo.zoneOccupied === zoneInfo.zoneCapacity}
+            isFull={zoneInfo.free === 0}
           />
 
           <OverviewCard
-            value={zoneInfo.zoneOccupied ?? 0}
+            value={(zoneInfo.total ?? 0) - (zoneInfo.free ?? 0)}
             title="Occupied Slots"
             subtitle="Currently in use"
-            isFull={zoneInfo.zoneOccupied === zoneInfo.zoneCapacity}
+            isFull={zoneInfo.free === 0}
           />
         </div>
       </div>
       {/* The ummmm occpied progress bar */}
       <CapacityProgressCard
-        capacity={zoneInfo.zoneCapacity}
-        occupied={zoneInfo.zoneOccupied}
-        isFull={zoneInfo.zoneOccupied === zoneInfo.zoneCapacity}
+        capacity={zoneInfo.total}
+        occupied={zoneInfo.total - zoneInfo.free}
+        isFull={zoneInfo.free === 0}
       />
 
       {/* Parking slot list part */}
@@ -156,15 +189,18 @@ export default function ZoneDetails() {
         <span className="text-primary font-bold text-xl w-full">
           Parking Slots
         </span>
-        <div className="grid w-full  grid-cols-[repeat(auto-fit,minmax(100px,1fr))] gap-3 lg:gap-4">
-          {zoneInfo &&
-            zoneInfo.parkingSlots?.map((slot, index) => (
+        <div className="grid w-full px-1  grid-cols-[repeat(auto-fit,minmax(100px,1fr))] gap-3 lg:gap-4">
+          {Object.keys(zoneInfo.slots ?? {}).map((slot) => {
+            const slotState = zoneInfo.slots[slot];
+
+            return (
               <SlotBlock
-                key={index}
-                slotNo={slot.slotNo}
-                occupied={slot.occupied}
+                key={slot}
+                slotNo={slot}
+                occupied={slotState === "occupied"}
               />
-            ))}
+            );
+          })}
         </div>
       </div>
     </div>
@@ -198,9 +234,9 @@ const OverviewCard = ({ value, title, subtitle, isFull = false }) => {
 
 const SlotBlock = ({ slotNo, occupied }) => {
   return (
-    <div className="hover-3d">
+    <div className="hover-3d w-25">
       <div
-        className={`flex flex-col items-start justify-start h-16 w-full min-w-0 rounded-md border border-primary ${occupied ? "bg-primary-light" : "bg-card"} py-1 px-3 shadow-sm shadow-gray-400/30 overflow-hidden`}
+        className={`flex flex-col items-start justify-start h-16 w-25 min-w-0 rounded-md border border-primary ${occupied ? "bg-primary-light" : "bg-card"} py-1 px-3 shadow-sm shadow-gray-400/30 overflow-hidden`}
       >
         <span className="shrink-0 font-bold text-primary">{slotNo}</span>
         <div className="flex items-center justify-center w-full h-full">

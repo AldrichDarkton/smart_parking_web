@@ -1,10 +1,12 @@
 import { CarFront } from "lucide-react";
 import { useEffect, useState } from "react";
 
-export default function MemberForm() {
+export default function MemberForm({ memberId }) {
   const [plateNumber, setPlateNumber] = useState("");
   const [ownerName, setOwnerName] = useState("");
   const [note, setNote] = useState("");
+  const [isEdit, setIsEdit] = useState(false);
+  const [selectedMember, setSelectedMember] = useState(null);
 
   const handleSubmit = (e) => {
     e.preventDefault();
@@ -22,6 +24,19 @@ export default function MemberForm() {
     setNote("");
   };
 
+  useEffect(() => {
+    const retrieveMember = async () => {
+      if (memberId) {
+        setIsEdit(true);
+        // This is where I'll fetch the data
+      } else {
+        setIsEdit(false);
+      }
+    };
+
+    retrieveMember();
+  }, [memberId]);
+
   return (
     <div className="w-full sm:w-100 h-fit p-4 rounded-lg bg-card ">
       {/* Form header */}
@@ -31,10 +46,10 @@ export default function MemberForm() {
         </div>
         <div className="flex flex-col items-start justify-center">
           <span className="text-primary font-bold text-xl">
-            Vehicle Registration
+            Vehicle {isEdit ? "Edit" : "Registration"}
           </span>
           <span className="text-primary font-light text-xs">
-            Add a new VIP or Member vehicle
+            {isEdit ? "Edit" : "Add a new "} VIP or Member vehicle
           </span>
         </div>
       </div>
@@ -86,7 +101,7 @@ export default function MemberForm() {
         </fieldset>
         <div className="h-5"></div>
         <button type="submit" className="btn btn-primary">
-          Register Vehicles
+          {isEdit ? "Edit" : "Register"} Vehicles
         </button>
         <button
           type="button"

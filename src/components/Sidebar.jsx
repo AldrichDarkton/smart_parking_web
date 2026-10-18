@@ -14,10 +14,28 @@ import {
 import { useEffect, useState } from "react";
 
 const tempData = {
-  total_spots: 5,
-  occupied_spots: 3,
-  available_spots: 2,
-  is_full: false,
+  total: 5,
+  free: 2,
+  occupied: 3,
+  zones: {
+    "Zone A": {
+      total: 3,
+      free: 2,
+      slots: {
+        A1: "occupied",
+        A2: "free",
+        A3: "free",
+      },
+    },
+    "Zone B": {
+      total: 2,
+      free: 1,
+      slots: {
+        B1: "occupied",
+        B2: "free",
+      },
+    },
+  },
 };
 
 const sidebarVariants = {
@@ -53,10 +71,10 @@ const iconLineVariants = {
 
 export default function SideBar({ isOpen, setIsOpen }) {
   const [overviewData, setOverviewData] = useState({
-    total_spots: 0,
-    occupied_spots: 0,
-    available_spots: 0,
-    is_full: false,
+    total: 0,
+    free: 0,
+    occupied: 0,
+    zones: {},
   });
 
   useEffect(() => {
@@ -76,21 +94,6 @@ export default function SideBar({ isOpen, setIsOpen }) {
     { to: "/log_view", Icon: Logs, label: "Parking Log" },
     { to: "/member_vehicles", Icon: CarFront, label: "Member Vehicles" },
     { to: "/account_management", Icon: UserCog2, label: "Account Management" },
-  ];
-
-  const zoneList = [
-    {
-      to: "/zone/A",
-      Icon: BoxSelectIcon,
-      label: "Zone A",
-      subTitle: "Open-air parking",
-    },
-    {
-      to: "/zone/B",
-      Icon: BoxSelectIcon,
-      label: "Zone B",
-      subTitle: "Basement parking",
-    },
   ];
 
   return (
@@ -150,13 +153,13 @@ export default function SideBar({ isOpen, setIsOpen }) {
           >
             <div className="bg-background rounded-md inset-shadow-sm inset-shadow-gray-400/50 w-25 h-15 p-2 flex flex-col justify-center items-start">
               <span className="text-lg font-bold text-primary">
-                {overviewData.total_spots}
+                {overviewData.total}
               </span>
               <span className="-mt-[3px]">TOTAL</span>
             </div>
             <div className="bg-background rounded-md inset-shadow-sm inset-shadow-gray-400/50 w-25 h-15 p-2 flex flex-col justify-center items-start">
               <span className="text-lg font-bold text-primary">
-                {overviewData.available_spots}
+                {overviewData.free}
               </span>
               <span className="-mt-[3px]">AVAILABLE</span>
             </div>
@@ -194,16 +197,19 @@ export default function SideBar({ isOpen, setIsOpen }) {
             aria-label="Sidebar navigation"
           >
             <span className="text-primary font-semibold">Zones</span>
-            {zoneList.map((item, index) => (
-              <SidebarLink
-                key={item.to ?? `${item.label}-${index}`}
-                to={item.to}
-                Icon={item.Icon}
-                label={item.label}
-                isOpen={isOpen}
-                subTitle={item.subTitle}
-              />
-            ))}
+            {Object.keys(overviewData.zones).length > 0 &&
+              Object.keys(overviewData.zones).map((key, index) => {
+                return (
+                  <SidebarLink
+                    key={index}
+                    to={`/zone/${key}`}
+                    Icon={BoxSelectIcon}
+                    label={key}
+                    isOpen={isOpen}
+                    // subTitle={}
+                  />
+                );
+              })}
           </motion.nav>
         </div>
 

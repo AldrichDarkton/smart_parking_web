@@ -1,5 +1,5 @@
 import { Pencil, Search, Trash } from "lucide-react";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import MemberForm from "../components/MemberForm";
 
 const vehicles = [
@@ -91,8 +91,24 @@ const vehicles = [
 export default function MemberManagement() {
   const [searchKey, setSearchKey] = useState("");
   const [vehicleList, setVehicleList] = useState([]);
+  const [selectedMember, setSelectedMember] = useState(null);
 
   const [currentPage, setCurrentPage] = useState(1);
+
+  const formDialogRef = useRef(null);
+  const [formKey, setFormKey] = useState(0);
+
+  const openRegisterForm = () => {
+    setFormKey((prev) => prev + 1);
+    setSelectedMember(null);
+    formDialogRef.current?.showModal();
+  };
+
+  const openEditForm = (memberId) => {
+    setSelectedMember(memberId);
+    setFormKey((prev) => prev + 1);
+    formDialogRef.current?.showModal();
+  };
 
   const recordsPerPage = 10;
   const totalPages = Math.ceil(vehicleList.length / recordsPerPage);
@@ -169,9 +185,7 @@ export default function MemberManagement() {
                 <button
                   type="button"
                   className="btn btn-primary"
-                  onClick={() =>
-                    document.getElementById("form-module").showModal()
-                  }
+                  onClick={() => openRegisterForm()}
                 >
                   Register
                 </button>
@@ -208,9 +222,7 @@ export default function MemberManagement() {
                           <button
                             type="button"
                             className="btn btn-soft btn-primary"
-                            onClick={() =>
-                              document.getElementById("form-module").showModal()
-                            }
+                            onClick={() => openEditForm(vehicle.licensePlate)}
                           >
                             <Pencil className="w-5 h-5" aria-hidden="true" />
                             <span>Edit</span>
@@ -304,9 +316,9 @@ export default function MemberManagement() {
         </form>
       </dialog>
 
-      <dialog id="form-module" className=" modal ">
+      <dialog ref={formDialogRef} id="form-module" className=" modal ">
         <div className="modal-box w-fit">
-          <MemberForm />
+          <MemberForm key={formKey} memberId={selectedMember} />
         </div>
         <form method="dialog" className="modal-backdrop">
           <button>close</button>

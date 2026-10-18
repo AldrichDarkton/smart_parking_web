@@ -1,5 +1,5 @@
 import { Pencil, Search, Trash } from "lucide-react";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import AccountForm from "../components/AccountForm";
 
 const personnel = [
@@ -73,8 +73,24 @@ const personnel = [
 export default function AccountManagement() {
   const [searchKey, setSearchKey] = useState("");
   const [personnelList, setPersonnelList] = useState([]);
+  const [selectedAccount, setSelectedAccount] = useState(null);
 
   const [currentPage, setCurrentPage] = useState(1);
+
+  const formDialogRef = useRef(null);
+  const [formKey, setFormKey] = useState(0);
+
+  const openRegisterForm = () => {
+    setFormKey((prev) => prev + 1);
+    setSelectedAccount(null);
+    formDialogRef.current?.showModal();
+  };
+
+  const openEditForm = (accountId) => {
+    setSelectedAccount(accountId);
+    setFormKey((prev) => prev + 1);
+    formDialogRef.current?.showModal();
+  };
 
   const recordsPerPage = 10;
   const totalPages = Math.ceil(personnelList.length / recordsPerPage);
@@ -156,9 +172,7 @@ export default function AccountManagement() {
                 <button
                   type="button"
                   className="btn btn-primary"
-                  onClick={() =>
-                    document.getElementById("form-module").showModal()
-                  }
+                  onClick={() => openRegisterForm()}
                 >
                   Register
                 </button>
@@ -216,11 +230,7 @@ export default function AccountManagement() {
                             <button
                               type="button"
                               className="btn btn-soft btn-primary"
-                              onClick={() =>
-                                document
-                                  .getElementById("form-module")
-                                  .showModal()
-                              }
+                              onClick={() => openEditForm(person.username)}
                             >
                               <Pencil className="w-5 h-5" aria-hidden="true" />
                               <span>Edit</span>
@@ -313,9 +323,9 @@ export default function AccountManagement() {
         </form>
       </dialog>
 
-      <dialog id="form-module" className=" modal ">
+      <dialog ref={formDialogRef} id="form-module" className=" modal ">
         <div className="modal-box w-fit">
-          <AccountForm />
+          <AccountForm key={formKey} accountId={selectedAccount} />
         </div>
         <form method="dialog" className="modal-backdrop">
           <button>close</button>
