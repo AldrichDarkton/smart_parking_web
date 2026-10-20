@@ -1,56 +1,35 @@
-import { useEffect, useState } from "react";
 import ActiveEntryMonitorList from "../components/ActiveEntryMonitorList";
 import CapacityProgressCard from "../components/CapacityProgressCard";
 import ZoneBlock from "../components/ZoneBlock";
+import { useParkingStore } from "../store/parkingStore";
 
-const liveData = {
-  total: 5,
-  free: 2,
-  occupied: 3,
-  zones: {
-    "Zone A": {
-      total: 3,
-      free: 2,
-      slots: {
-        A1: "occupied",
-        A2: "free",
-        A3: "free",
-      },
-    },
-    "Zone B": {
-      total: 2,
-      free: 1,
-      slots: {
-        B1: "occupied",
-        B2: "free",
-      },
-    },
-  },
-};
+// const liveData = {
+//   total: 5,
+//   free: 2,
+//   occupied: 3,
+//   zones: {
+//     "Zone A": {
+//       total: 3,
+//       free: 2,
+//       slots: {
+//         A1: "occupied",
+//         A2: "free",
+//         A3: "free",
+//       },
+//     },
+//     "Zone B": {
+//       total: 2,
+//       free: 1,
+//       slots: {
+//         B1: "occupied",
+//         B2: "free",
+//       },
+//     },
+//   },
+// };
 
 export default function Dashboard() {
-  const [overviewData, setOverviewData] = useState({
-    total: 0,
-    free: 0,
-    occupied: 0,
-    zones: {},
-  });
-  const [isLoading, setIsLoading] = useState(false);
-
-  useEffect(() => {
-    const initializeData = async () => {
-      setIsLoading(true);
-      try {
-        setOverviewData(liveData);
-      } catch (error) {
-        console.error("Error fetching data:", error);
-      } finally {
-        setIsLoading(false);
-      }
-    };
-
-    initializeData();
-  }, []);
+  const { total, free, occupied, zone_list, zone_slots } = useParkingStore();
 
   return (
     <div className="flex flex-col items-center justify-start gap-4 w-full">
@@ -60,39 +39,28 @@ export default function Dashboard() {
       {/* The number card display part */}
       <div className="grid grid-rows-2 grid-cols-2 grid-flow-row w-full gap-1 column-gap-1 md:flex md:justify-between md:flex-wrap md:items-center">
         <NumberCard
-          number={
-            isLoading && !overviewData?.zones
-              ? 0
-              : Object.keys(overviewData?.zones).length
-          }
+          number={!zone_list ? 0 : zone_list.length}
           title="Total Zones"
           subtitle="across all levles"
         />
         <NumberCard
-          number={isLoading && !overviewData?.total ? 0 : overviewData.total}
+          number={!total ? 0 : total}
           title="Total Slots"
           subtitle="parking space"
         />
         <NumberCard
-          number={isLoading && !overviewData?.free ? 0 : overviewData.free}
+          number={!free ? 0 : free}
           title="Available"
           subtitle="available parking spaces"
         />
         <NumberCard
-          number={
-            isLoading && !overviewData?.free
-              ? 0
-              : overviewData.total - overviewData.free
-          }
+          number={!occupied ? 0 : occupied}
           title="Occupied"
           subtitle="unavailable parking spaces"
         />
       </div>
       {/* The overall capacity section */}
-      <CapacityProgressCard
-        capacity={overviewData.total}
-        occupied={overviewData.total - overviewData.free}
-      />
+      <CapacityProgressCard capacity={total} occupied={occupied} />
       <div className="grid grid-cols-1 gap-5 lg:grid-cols-2 w-full ">
         {/* The zone block list */}
         <div className="flex flex-col items-center gap-4 justify-start w-full  h-fit">
@@ -100,18 +68,24 @@ export default function Dashboard() {
             Parking Zones
           </span>
           <div className="grid grid-cols-1 sm:grid-cols-2  gap-5 w-full px-1">
-            {isLoading ? (
-              <div className={`w-full min-w-0 rounded-xl skeleton h-100`}></div>
+            {zone_list.length == 0 ? (
+              <div
+                className={`w-full min-w-0 flex items-center text-gray-600
+                     justify-center font-bold text-xl rounded-xl skeleton h-70`}
+              >
+                Detecting Zones...
+              </div>
             ) : (
-              Object.keys(overviewData.zones).map((key) => {
-                const zone = overviewData.zones[key];
+              zone_slots.map((zone, index) => {
+                const occupiedSlots = zone.slots.filter(
+                  (slot) => slot.occupied,
+                );
                 return (
                   <ZoneBlock
-                    key={key}
-                    zoneName={key}
-                    zoneSubName="Open-air Parking"
-                    zoneCapacity={zone.total}
-                    zoneOccupied={zone.free}
+                    key={index}
+                    zoneName={zone.zone}
+                    zoneCapacity={zone.slots.length}
+                    zoneOccupied={occupiedSlots.length}
                   />
                 );
               })

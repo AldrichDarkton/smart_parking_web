@@ -1,21 +1,28 @@
 import { CarFront } from "lucide-react";
 import { useEffect, useState } from "react";
+import { handleRegisterVehicle } from "../services/api/parkingFormService";
 
-export default function MemberForm({ memberId }) {
+export default function MemberForm({ memberId, handleMemberSaveSuccess }) {
   const [plateNumber, setPlateNumber] = useState("");
   const [ownerName, setOwnerName] = useState("");
   const [note, setNote] = useState("");
   const [isEdit, setIsEdit] = useState(false);
   const [selectedMember, setSelectedMember] = useState(null);
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    const formData = {
+
+    const response = await handleRegisterVehicle({
       plate_number: plateNumber,
       owner_name: ownerName,
-      note: note,
-    };
-    console.log(formData);
+      notes: note,
+    });
+
+    if (response.isSuccess) {
+      handleMemberSaveSuccess();
+    } else {
+      console.log(response.body.message);
+    }
   };
 
   const resetData = () => {

@@ -2,6 +2,7 @@ import { useParams } from "react-router";
 import { useEffect, useState } from "react";
 import { Car, ImageIcon, SquareParking } from "lucide-react";
 import CapacityProgressCard from "../components/CapacityProgressCard";
+import { useParkingStore } from "../store/parkingStore";
 
 // Temp data
 // const zoneDataList = [
@@ -75,44 +76,45 @@ import CapacityProgressCard from "../components/CapacityProgressCard";
 //   },
 // ];
 
-const zoneDataList = {
-  "Zone A": {
-    total: 3,
-    free: 2,
-    slots: {
-      A1: "occupied",
-      A2: "free",
-      A3: "free",
-      // A4: "occupied",
-      // A5: "free",
-      // A6: "free",
-      // A7: "occupied",
-      // A8: "free",
-      // A9: "free",
-      // A10: "occupied",
-      // A11: "free",
-      // A12: "free",
-      // A13: "occupied",
-      // A14: "free",
-      // A15: "free",
-      // A16: "occupied",
-      // A17: "free",
-      // A18: "free",
-    },
-  },
-  "Zone B": {
-    total: 2,
-    free: 1,
-    slots: {
-      B1: "occupied",
-      B2: "free",
-    },
-  },
-};
+// const zoneDataList = {
+//   "Zone A": {
+//     total: 3,
+//     free: 2,
+//     slots: {
+//       A1: "occupied",
+//       A2: "free",
+//       A3: "free",
+//       // A4: "occupied",
+//       // A5: "free",
+//       // A6: "free",
+//       // A7: "occupied",
+//       // A8: "free",
+//       // A9: "free",
+//       // A10: "occupied",
+//       // A11: "free",
+//       // A12: "free",
+//       // A13: "occupied",
+//       // A14: "free",
+//       // A15: "free",
+//       // A16: "occupied",
+//       // A17: "free",
+//       // A18: "free",
+//     },
+//   },
+//   "Zone B": {
+//     total: 2,
+//     free: 1,
+//     slots: {
+//       B1: "occupied",
+//       B2: "free",
+//     },
+//   },
+// };
 
 export default function ZoneDetails() {
   const { zoneId } = useParams();
   const [zoneInfo, setZoneInfo] = useState({});
+  const { zone_slots } = useParkingStore();
 
   useEffect(() => {
     if (!zoneId) {
@@ -120,18 +122,18 @@ export default function ZoneDetails() {
     }
 
     const findZoneInfo = async () => {
-      const zoneData = zoneDataList[zoneId];
+      const zoneData = zone_slots.filter((slot) => slot.zone === zoneId)[0];
 
       setZoneInfo(zoneData ?? {});
     };
 
     findZoneInfo();
-  }, [zoneId]);
+  }, [zoneId, zone_slots]);
 
   return (
     <div className="flex flex-col items-center justify-start gap-4 w-full">
       <div className="h-10 w-full flex flex-col justify-center items-start ">
-        <span className="text-primary font-bold text-xl">{zoneId}</span>
+        <span className="text-primary font-bold text-xl">{zoneInfo.zone}</span>
         {/* <span className="text-primary font-light text-xs -mt-2">
           {zoneInfo.zoneSubName}
         </span> */}
@@ -170,7 +172,7 @@ export default function ZoneDetails() {
           />
 
           <OverviewCard
-            value={(zoneInfo.total ?? 0) - (zoneInfo.free ?? 0)}
+            value={zoneInfo.occupied ?? 0}
             title="Occupied Slots"
             subtitle="Currently in use"
             isFull={zoneInfo.free === 0}
@@ -180,7 +182,7 @@ export default function ZoneDetails() {
       {/* The ummmm occpied progress bar */}
       <CapacityProgressCard
         capacity={zoneInfo.total}
-        occupied={zoneInfo.total - zoneInfo.free}
+        occupied={zoneInfo.occupied}
         isFull={zoneInfo.free === 0}
       />
 
@@ -190,17 +192,17 @@ export default function ZoneDetails() {
           Parking Slots
         </span>
         <div className="grid w-full px-1  grid-cols-[repeat(auto-fit,minmax(100px,1fr))] gap-3 lg:gap-4">
-          {Object.keys(zoneInfo.slots ?? {}).map((slot) => {
-            const slotState = zoneInfo.slots[slot];
-
-            return (
-              <SlotBlock
-                key={slot}
-                slotNo={slot}
-                occupied={slotState === "occupied"}
-              />
-            );
-          })}
+          {zoneInfo.slots &&
+            zoneInfo.slots.map((slot) => {
+              return (
+                <SlotBlock
+                  key={slot.name}
+                  slotNo={slot.name}
+                  plateNo={slot.plate}
+                  occupied={slot.occupied}
+                />
+              );
+            })}
         </div>
       </div>
     </div>
@@ -232,16 +234,19 @@ const OverviewCard = ({ value, title, subtitle, isFull = false }) => {
   );
 };
 
-const SlotBlock = ({ slotNo, occupied }) => {
+const SlotBlock = ({ slotNo, plateNo, occupied }) => {
   return (
     <div className="hover-3d w-25">
       <div
-        className={`flex flex-col items-start justify-start h-16 w-25 min-w-0 rounded-md border border-primary ${occupied ? "bg-primary-light" : "bg-card"} py-1 px-3 shadow-sm shadow-gray-400/30 overflow-hidden`}
+        className={`flex flex-col items-start justify-start h-18 w-25 min-w-0 rounded-md border border-primary ${occupied ? "bg-primary-light" : "bg-card"} py-1 px-3 shadow-sm shadow-gray-400/30 overflow-hidden`}
       >
         <span className="shrink-0 font-bold text-primary">{slotNo}</span>
-        <div className="flex items-center justify-center w-full h-full">
+        <div className="flex flex-col items-center justify-center w-full h-full">
           {occupied ? (
-            <Car className="shrink-0 text-2xl font-bold text-primary sm:text-3xl" />
+            <>
+              <Car className="shrink-0 text-2xl font-bold text-primary sm:text-3xl" />
+              <span className="text-xs text-base-content/60">{plateNo}</span>
+            </>
           ) : (
             <SquareParking className="shrink-0 text-2xl font-bold text-primary sm:text-3xl" />
           )}

@@ -1,84 +1,32 @@
 import { Pencil, Search, Trash } from "lucide-react";
-import { useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import AccountForm from "../components/AccountForm";
-
-const personnel = [
-  {
-    username: "Jack Grim",
-    accessLevel: "Administrator",
-    addedDate: "03/10/2026",
-  },
-  {
-    username: "Clark Kent",
-    accessLevel: "Viewer",
-    addedDate: "03/10/2026",
-  },
-  {
-    username: "Operator 1",
-    accessLevel: "Viewer",
-    addedDate: "03/10/2026",
-  },
-  {
-    username: "Bruce Wayne",
-    accessLevel: "Administrator",
-    addedDate: "04/10/2026",
-  },
-  {
-    username: "Diana Prince",
-    accessLevel: "Viewer",
-    addedDate: "04/10/2026",
-  },
-  {
-    username: "Operator 2",
-    accessLevel: "Viewer",
-    addedDate: "05/10/2026",
-  },
-  {
-    username: "Barry Allen",
-    accessLevel: "Viewer",
-    addedDate: "05/10/2026",
-  },
-  {
-    username: "Arthur Curry",
-    accessLevel: "Viewer",
-    addedDate: "06/10/2026",
-  },
-  {
-    username: "Victor Stone",
-    accessLevel: "Administrator",
-    addedDate: "07/10/2026",
-  },
-  {
-    username: "Operator 3",
-    accessLevel: "Viewer",
-    addedDate: "08/10/2026",
-  },
-  {
-    username: "Selina Kyle",
-    accessLevel: "Viewer",
-    addedDate: "09/10/2026",
-  },
-  {
-    username: "Oliver Queen",
-    accessLevel: "Administrator",
-    addedDate: "10/10/2026",
-  },
-  {
-    username: "Operator 4",
-    accessLevel: "Viewer",
-    addedDate: "11/10/2026",
-  },
-];
+import {
+  handleDeleteAccount,
+  handleGetAccounts,
+} from "../services/api/parkingFormService";
 
 export default function AccountManagement() {
   const [searchKey, setSearchKey] = useState("");
   const [personnelList, setPersonnelList] = useState([]);
   const [selectedAccount, setSelectedAccount] = useState(null);
+  const [selectedDeleteAccountId, setSelectedDeleteAccountId] = useState(null);
 
   const [currentPage, setCurrentPage] = useState(1);
 
   const formDialogRef = useRef(null);
+  const deleteDialogRef = useRef(null);
   const [formKey, setFormKey] = useState(0);
+
+  const doInitializeData = useCallback(async () => {
+    const response = await handleGetAccounts();
+
+    if (response.isSuccess) {
+      setPersonnelList(response.body.staff);
+    } else {
+      console.log(response.body.message);
+    }
+  }, []);
 
   const openRegisterForm = () => {
     setFormKey((prev) => prev + 1);
@@ -92,39 +40,56 @@ export default function AccountManagement() {
     formDialogRef.current?.showModal();
   };
 
-  const recordsPerPage = 10;
-  const totalPages = Math.ceil(personnelList.length / recordsPerPage);
+  const openDeleteConfirmation = (staffId) => {
+    setSelectedDeleteAccountId(staffId);
+    deleteDialogRef.current?.showModal();
+  };
 
+  const doDelete = async () => {
+    const response = await handleDeleteAccount(selectedDeleteAccountId);
+    console.log(response);
+
+    if (response.isSuccess) {
+      doInitializeData();
+      deleteDialogRef.current?.close();
+    } else {
+      console.log(response.body.message);
+    }
+  };
+
+  const handleAccountSaveSuccess = async () => {
+    formDialogRef.current?.close();
+
+    setSearchKey("");
+    setCurrentPage(1);
+
+    await doInitializeData();
+  };
+
+  useEffect(() => {
+    const initializeData = async () => {
+      doInitializeData();
+    };
+
+    initializeData();
+  }, [doInitializeData]);
+
+  //--------------- Pagination & Search ---------------
+
+  const recordsPerPage = 10;
+  const normalizedSearch = searchKey.trim().toLowerCase();
+  const filteredPersonnel = personnelList.filter((personnel) =>
+    String(personnel.username ?? "")
+      .toLowerCase()
+      .includes(normalizedSearch),
+  );
+
+  const totalPages = Math.ceil(filteredPersonnel.length / recordsPerPage);
   const startIndex = (currentPage - 1) * recordsPerPage;
-  const currentRecords = personnelList.slice(
+  const currentRecords = filteredPersonnel.slice(
     startIndex,
     startIndex + recordsPerPage,
   );
-
-  useEffect(() => {
-    const getPersonnel = async () => {
-      setPersonnelList(personnel);
-    };
-
-    getPersonnel();
-  }, []);
-
-  useEffect(() => {
-    // If input is cleared, reset states immediately and exit
-    if (!searchKey.trim()) {
-      return;
-    }
-
-    const handler = setTimeout(async () => {
-      try {
-        // This is where I'll call the search method
-      } catch (error) {
-        console.error("Search failed:", error);
-      }
-    }, 600);
-
-    return () => clearTimeout(handler);
-  }, [searchKey]);
 
   return (
     <>
@@ -180,14 +145,18 @@ export default function AccountManagement() {
 
               {/* Table content */}
               <div className="overflow-x-auto max-h-80 rounded-box border border-base-content/5 bg-background">
-                <table className="table">
-                  {/* head */}
+                <table className="table table-fixed w-full">
+                  <colgroup>
+                    <col className="w-12" />
+                    <col />
+                    <col />
+                    <col />
+                  </colgroup>
                   <thead>
                     <tr>
                       <th></th>
                       <th>Personnel</th>
-                      <th>Access Level</th>
-                      <th>Added Date</th>
+                      <th>Role</th>
                       <th>Action</th>
                     </tr>
                   </thead>
@@ -207,7 +176,7 @@ export default function AccountManagement() {
                           <td>
                             <div className="flex items-center gap-3">
                               <span className="w-7 h-7 rounded-md bg-primary-light text-primary flex items-center justify-center font-bold text-xs">
-                                {person.username.charAt(0)}
+                                {person.username.charAt(0).toUpperCase()}
                               </span>
                               <span className="font-medium">
                                 {person.username}
@@ -217,36 +186,45 @@ export default function AccountManagement() {
                           <td>
                             <span
                               className={`badge ${
-                                person.accessLevel === "Administrator"
+                                person.role === "admin"
                                   ? "badge-primary badge-soft"
                                   : "badge-neutral badge-soft"
                               }`}
                             >
-                              {person.accessLevel}
+                              {person.role.toUpperCase()}
                             </span>
                           </td>
-                          <td>{person.addedDate}</td>
                           <td className="flex items-center w-fit justify-start gap-5">
-                            <button
-                              type="button"
-                              className="btn btn-soft btn-primary"
-                              onClick={() => openEditForm(person.username)}
-                            >
-                              <Pencil className="w-5 h-5" aria-hidden="true" />
-                              <span>Edit</span>
-                            </button>
-                            <button
-                              type="button"
-                              className="btn btn-soft btn-error"
-                              onClick={() =>
-                                document
-                                  .getElementById("delete_model")
-                                  .showModal()
-                              }
-                            >
-                              <Trash className="w-5 h-5" aria-hidden="true" />
-                              <span>Remove</span>
-                            </button>
+                            {person.id == 1 ? (
+                              <></>
+                            ) : (
+                              <>
+                                <button
+                                  type="button"
+                                  className="btn btn-soft btn-primary"
+                                  onClick={() => openEditForm(person.username)}
+                                >
+                                  <Pencil
+                                    className="w-5 h-5"
+                                    aria-hidden="true"
+                                  />
+                                  <span>Edit</span>
+                                </button>
+                                <button
+                                  type="button"
+                                  className="btn btn-soft btn-error"
+                                  onClick={() =>
+                                    openDeleteConfirmation(person.id)
+                                  }
+                                >
+                                  <Trash
+                                    className="w-5 h-5"
+                                    aria-hidden="true"
+                                  />
+                                  <span>Remove</span>
+                                </button>
+                              </>
+                            )}
                           </td>
                         </tr>
                       ))}
@@ -306,14 +284,15 @@ export default function AccountManagement() {
           </div>
         </div>
       </div>
-      <dialog id="delete_model" className="modal">
+      <dialog ref={deleteDialogRef} id="delete_model" className="modal">
         <div className="modal-box">
           <h3 className="font-bold text-lg">Delete Confirmation!</h3>
           <p className="py-4">Are you sure you want to delete this account?</p>
           <div className="modal-action">
-            <span className="btn btn-error">Delete</span>
-
             <form method="dialog">
+              <button onClick={() => doDelete()} className="btn btn-error">
+                Delete
+              </button>
               <button className="btn">Cancel</button>
             </form>
           </div>
@@ -325,7 +304,11 @@ export default function AccountManagement() {
 
       <dialog ref={formDialogRef} id="form-module" className=" modal ">
         <div className="modal-box w-fit">
-          <AccountForm key={formKey} accountId={selectedAccount} />
+          <AccountForm
+            key={formKey}
+            accountId={selectedAccount}
+            handleAccountSaveSuccess={handleAccountSaveSuccess}
+          />
         </div>
         <form method="dialog" className="modal-backdrop">
           <button>close</button>

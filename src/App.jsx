@@ -1,4 +1,4 @@
-import { BrowserRouter, Route, Routes } from "react-router-dom";
+import { BrowserRouter, Navigate, Route, Routes } from "react-router-dom";
 
 import Dashboard from "./pages/Dashboard";
 import ZoneDetails from "./pages/ZoneDetails";
@@ -13,7 +13,8 @@ export default function App() {
   return (
     <BrowserRouter>
       <Routes>
-        <Route index element={<Login />} />
+        <Route index element={<Navigate to="/login" replace />} />
+        <Route path="login" element={<Login />} />
         <Route path="*" element={<NotFound />} />
 
         <Route element={<DashboardTemplate />}>

@@ -1,4 +1,4 @@
-import { NavLink } from "react-router-dom";
+import { NavLink, useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
 import logo from "../assets/logo_square.png";
 import PlateSearchBox from "./PlateSearchBox";
@@ -11,32 +11,9 @@ import {
   User,
   UserCog2,
 } from "lucide-react";
-import { useEffect, useState } from "react";
-
-const tempData = {
-  total: 5,
-  free: 2,
-  occupied: 3,
-  zones: {
-    "Zone A": {
-      total: 3,
-      free: 2,
-      slots: {
-        A1: "occupied",
-        A2: "free",
-        A3: "free",
-      },
-    },
-    "Zone B": {
-      total: 2,
-      free: 1,
-      slots: {
-        B1: "occupied",
-        B2: "free",
-      },
-    },
-  },
-};
+import { handleLogout } from "../services/api/parkingFormService";
+import { useUserStore } from "../store/userStore";
+import { useParkingStore } from "../store/parkingStore";
 
 const sidebarVariants = {
   open: {
@@ -70,24 +47,20 @@ const iconLineVariants = {
 };
 
 export default function SideBar({ isOpen, setIsOpen }) {
-  const [overviewData, setOverviewData] = useState({
-    total: 0,
-    free: 0,
-    occupied: 0,
-    zones: {},
-  });
+  // const { total, free, zone_list } = useParkingStore();
+  const { username, role } = useUserStore();
 
-  useEffect(() => {
-    const initializeData = async () => {
-      try {
-        setOverviewData(tempData);
-      } catch (error) {
-        console.error("Error fetching data:", error);
-      }
-    };
+  const navigate = useNavigate();
 
-    initializeData();
-  }, []);
+  const doLogout = async () => {
+    const response = await handleLogout();
+
+    if (response.isSuccess) {
+      navigate("/login");
+    } else {
+      console.log(response.body.message);
+    }
+  };
 
   const menuItems = [
     { to: "/dashboard", Icon: Grid2X2, label: "Overview" },
@@ -147,24 +120,7 @@ export default function SideBar({ isOpen, setIsOpen }) {
             </div>
           </div>
           {/* Overview section */}
-          <motion.div
-            layout
-            className="flex items-center justify-around px-2 py-3 w-full gap-1 border-b-2 border-primary"
-          >
-            <div className="bg-background rounded-md inset-shadow-sm inset-shadow-gray-400/50 w-25 h-15 p-2 flex flex-col justify-center items-start">
-              <span className="text-lg font-bold text-primary">
-                {overviewData.total}
-              </span>
-              <span className="-mt-[3px]">TOTAL</span>
-            </div>
-            <div className="bg-background rounded-md inset-shadow-sm inset-shadow-gray-400/50 w-25 h-15 p-2 flex flex-col justify-center items-start">
-              <span className="text-lg font-bold text-primary">
-                {overviewData.free}
-              </span>
-              <span className="-mt-[3px]">AVAILABLE</span>
-            </div>
-          </motion.div>
-          {/* Search section */}
+          <OverviewSection />
           <motion.div
             layout
             className="flex items-center justify-around py-3 w-full h-fit gap-1 border-b-2 border-primary"
@@ -191,26 +147,7 @@ export default function SideBar({ isOpen, setIsOpen }) {
           </motion.nav>
           {/* Zone links */}
 
-          <motion.nav
-            layout
-            className="flex flex-1 flex-col gap-1 py-3 px-2 "
-            aria-label="Sidebar navigation"
-          >
-            <span className="text-primary font-semibold">Zones</span>
-            {Object.keys(overviewData.zones).length > 0 &&
-              Object.keys(overviewData.zones).map((key, index) => {
-                return (
-                  <SidebarLink
-                    key={index}
-                    to={`/zone/${key}`}
-                    Icon={BoxSelectIcon}
-                    label={key}
-                    isOpen={isOpen}
-                    // subTitle={}
-                  />
-                );
-              })}
-          </motion.nav>
+          <ZoneSection isOpen={isOpen} />
         </div>
 
         {/* Logout button */}
@@ -225,18 +162,40 @@ export default function SideBar({ isOpen, setIsOpen }) {
               <User className="w-5 h-5 text-primary" aria-hidden="true" />
             </div>
             <div className="flex flex-col items-start justify-center">
-              <span className="font-semibold text-primary">User Name</span>
+              <span className="font-semibold text-primary">{username}</span>
               <span className="text-xs -mt-[3px] text-primary font-light">
-                Role
+                {role}
               </span>
             </div>
           </div>
           <LogOut
             className="w-5 h-5 text-danger cursor-pointer hover:scale-110 duration-75"
+            onClick={() => document.getElementById("logout_model").showModal()}
             aria-hidden="true"
           />
         </motion.div>
       </motion.aside>
+
+      <dialog id="logout_model" className="modal">
+        <div className="modal-box">
+          <h3 className="font-bold text-lg">Logout Confirmation!</h3>
+          <p className="py-4">
+            Are you sure you want to logout from this sesssion?
+          </p>
+          <div className="modal-action">
+            <span className="btn btn-error" onClick={() => doLogout()}>
+              Logout
+            </span>
+
+            <form method="dialog">
+              <button className="btn">Cancel</button>
+            </form>
+          </div>
+        </div>
+        <form method="dialog" className="modal-backdrop">
+          <button>close</button>
+        </form>
+      </dialog>
     </div>
   );
 }
@@ -285,6 +244,54 @@ function SidebarLink({ to, Icon, label, isOpen, subTitle }) {
           </div>
         )}
       </NavLink>
+    </motion.div>
+  );
+}
+
+function ZoneSection(isOpen) {
+  const { zone_list } = useParkingStore();
+
+  return (
+    <motion.nav
+      layout
+      className="flex flex-1 flex-col gap-1 py-3 px-2 "
+      aria-label="Sidebar navigation"
+    >
+      <span className="text-primary font-semibold">Zones</span>
+      {zone_list.length == 0 ? (
+        <span>No zones found</span>
+      ) : (
+        zone_list.map((zone, index) => (
+          <SidebarLink
+            key={index}
+            to={`/zone/${zone}`}
+            Icon={BoxSelectIcon}
+            label={zone}
+            isOpen={isOpen}
+            // subTitle={}
+          />
+        ))
+      )}
+    </motion.nav>
+  );
+}
+
+function OverviewSection() {
+  const { total, free } = useParkingStore();
+
+  return (
+    <motion.div
+      layout
+      className="flex items-center justify-around px-2 py-3 w-full gap-1 border-b-2 border-primary"
+    >
+      <div className="bg-background rounded-md inset-shadow-sm inset-shadow-gray-400/50 w-25 h-15 p-2 flex flex-col justify-center items-start">
+        <span className="text-lg font-bold text-primary">{total}</span>
+        <span className="-mt-[3px]">TOTAL</span>
+      </div>
+      <div className="bg-background rounded-md inset-shadow-sm inset-shadow-gray-400/50 w-25 h-15 p-2 flex flex-col justify-center items-start">
+        <span className="text-lg font-bold text-primary">{free}</span>
+        <span className="-mt-[3px]">AVAILABLE</span>
+      </div>
     </motion.div>
   );
 }

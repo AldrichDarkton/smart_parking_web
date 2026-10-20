@@ -8,12 +8,16 @@ import {
   EyeOff,
   ArrowRight,
 } from "lucide-react";
+import { useNavigate } from "react-router";
+import { handleLogin } from "../services/api/parkingFormService";
 
-export default function Login({ onSubmit }) {
+export default function Login() {
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState("");
+
+  const navigate = useNavigate();
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -24,17 +28,14 @@ export default function Login({ onSubmit }) {
       return;
     }
 
-    try {
-      if (onSubmit) {
-        await onSubmit({ username: username.trim(), password });
-      } else {
-        console.log("Login submitted", {
-          username: username.trim(),
-          password,
-        });
-      }
-    } catch (err) {
-      setError(err?.message || "Authentication failed. Please try again.");
+    const response = await handleLogin(username.trim(), password);
+
+    if (response.isSuccess) {
+      navigate("/dashboard");
+    } else {
+      setError(
+        response.body.message || "Authentication failed. Please try again.",
+      );
     }
   };
 

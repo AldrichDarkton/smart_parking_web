@@ -1,19 +1,10 @@
-import { useEffect, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { CarFront, Clock3, ParkingCircle, Radio } from "lucide-react";
-
-const parkingRecords = [];
+import { useParkingStore } from "../store/parkingStore";
+import { plateExists } from "../services/helperServices";
 
 export default function ActiveEntryMonitorList() {
-  const [parkingLog, setParkingLog] = useState([]);
-
-  useEffect(() => {
-    const getLog = async () => {
-      setParkingLog(parkingRecords);
-    };
-
-    getLog();
-  }, []);
+  const { active_logs } = useParkingStore();
 
   return (
     <div className="flex flex-col w-full overflow-hidden rounded-xl border-2 border-primary/30 bg-card shadow-md">
@@ -29,16 +20,16 @@ export default function ActiveEntryMonitorList() {
 
         <span className="badge badge-primary badge-soft gap-1.5 shrink-0">
           <Radio className="h-3 w-3" />
-          {parkingLog.length} Active
+          {active_logs.length} Active
         </span>
       </div>
 
       {/* Vehicle list */}
-      <ul className="list-none p-0 m-0 divide-y divide-base-300/70">
+      <ul className="list-none p-0 m-0 divide-y divide-base-300/70 min-h-47 ">
         <AnimatePresence mode="popLayout">
-          {parkingLog.length > 0 ? (
-            parkingLog.map((log) => (
-              <ActiveEntryListItem key={log.licensePlate} log={log} />
+          {active_logs.length > 0 ? (
+            active_logs.map((log, index) => (
+              <ActiveEntryListItem key={index} log={log} />
             ))
           ) : (
             <motion.li
@@ -66,11 +57,11 @@ export default function ActiveEntryMonitorList() {
       </ul>
 
       {/* Footer */}
-      {parkingLog.length > 0 && (
+      {active_logs.length > 0 && (
         <div className="border-t border-primary/20 bg-base-200/40 px-4 py-2.5">
           <p className="text-xs text-base-content/60">
-            Showing {parkingLog.length} active{" "}
-            {parkingLog.length === 1 ? "vehicle" : "vehicles"}
+            Showing {active_logs.length} active{" "}
+            {active_logs.length === 1 ? "vehicle" : "vehicles"}
           </p>
         </div>
       )}
@@ -79,14 +70,19 @@ export default function ActiveEntryMonitorList() {
 }
 
 function ActiveEntryListItem({ log }) {
+  const { zone_slots } = useParkingStore();
+
   const statusStyles = {
-    "FINDING SLOT": "badge-warning badge-soft",
-    INSIDE: "badge-primary badge-soft",
+    ROAMING: "badge-warning badge-soft",
+    PARKED: "badge-primary badge-soft",
     EXITED: "badge-ghost",
   };
 
-  const statusClass = statusStyles[log.status] ?? "badge-outline";
+  const status = plateExists(zone_slots, log.plate_number)
+    ? "PARKED"
+    : "ROAMING";
 
+  const statusClass = statusStyles[status] ?? "badge-outline";
   return (
     <motion.li
       layout
@@ -104,12 +100,12 @@ function ActiveEntryListItem({ log }) {
       {/* Plate and entry time */}
       <div className="flex flex-1 flex-col gap-1 min-w-0">
         <span className="font-bold text-sm text-base-content">
-          {log.licensePlate}
+          {log.plate_number}
         </span>
 
         <span className="flex items-center gap-1.5 text-xs text-base-content/60">
           <Clock3 className="h-3.5 w-3.5 shrink-0" />
-          {log.entry}
+          {log.entry_time}
         </span>
 
         <span className="text-xs text-base-content/60">
@@ -119,7 +115,7 @@ function ActiveEntryListItem({ log }) {
 
       {/* Status */}
       <span className={`badge ${statusClass} text-[10px] sm:text-xs shrink-0`}>
-        {log.status}
+        {status}
       </span>
     </motion.li>
   );

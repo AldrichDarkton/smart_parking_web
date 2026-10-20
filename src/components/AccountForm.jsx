@@ -1,21 +1,28 @@
 import { Pencil } from "lucide-react";
 import { useEffect, useState } from "react";
+import { handleRegisterAccount } from "../services/api/parkingFormService";
 
-export default function AccountForm({ accountId }) {
+export default function AccountForm({ accountId, handleAccountSaveSuccess }) {
   const [username, setUsername] = useState("");
   const [temporaryPassword, setTemporaryPassword] = useState("");
-  const [accessLevel, setAccessLevel] = useState("Viewer");
+  const [accessLevel, setAccessLevel] = useState("operator");
   const [isEdit, setIsEdit] = useState(false);
   const [selectedAccount, setSelectedAccount] = useState(null);
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    const formData = {
+
+    const response = await handleRegisterAccount({
       username: username,
-      temporary_password: temporaryPassword,
-      access_level: accessLevel,
-    };
-    console.log(formData);
+      password: temporaryPassword,
+      role: accessLevel,
+    });
+
+    if (response.isSuccess) {
+      handleAccountSaveSuccess();
+    } else {
+      console.log(response.body.message);
+    }
   };
 
   const resetData = () => {
@@ -92,7 +99,7 @@ export default function AccountForm({ accountId }) {
 
         <fieldset className="fieldset w-full">
           <label className="label font-bold" htmlFor="access-level">
-            Access Level *
+            Role *
           </label>
           <select
             id="access-level"
@@ -101,8 +108,8 @@ export default function AccountForm({ accountId }) {
             value={accessLevel}
             onChange={(e) => setAccessLevel(e.target.value)}
           >
-            <option value="Viewer">Viewer</option>
-            <option value="Administrator">Administrator</option>
+            <option value="operator">Operator (Read-Only Access)</option>
+            <option value="admin">Admin (Full Access)</option>
           </select>
         </fieldset>
 

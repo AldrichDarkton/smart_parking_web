@@ -2,6 +2,7 @@ import { LocateIcon, Search } from "lucide-react";
 import { AnimatePresence, motion } from "framer-motion";
 import { useEffect, useState } from "react";
 import PlateDetails from "./PlateDetails";
+import { handleFindCar } from "../services/api/parkingFormService";
 
 export default function PlateSearchBox() {
   const [searchKey, setSearchKey] = useState("");
@@ -10,26 +11,43 @@ export default function PlateSearchBox() {
   const [isSearching, setIsSearching] = useState(false);
 
   useEffect(() => {
-    // If input is cleared, reset states immediately and exit
-    if (!searchKey.trim()) {
+    // Reset immediately when the input is cleared
+    const trimmedKey = searchKey.trim();
+
+    if (!trimmedKey) {
       setIsSearching(false);
       setValidationMsg(null);
       setResult(null);
       return;
     }
+
     setIsSearching(true);
 
     const handler = setTimeout(async () => {
       try {
-        if (searchKey.trim().length != 7) {
+        if (trimmedKey.length !== 7) {
           setResult(null);
           setValidationMsg("Invalid plate number");
+          return;
+        }
+
+        setValidationMsg(null);
+
+        // Replace with your actual search method
+        const response = await handleFindCar(trimmedKey);
+
+        console.log(response);
+
+        if (response.isSuccess) {
+          setResult(response.body);
         } else {
-          setResult("#A03");
-          // This is where i'll call the search method
+          setResult(null);
+          setValidationMsg("Not found");
         }
       } catch (error) {
         console.error("Search failed:", error);
+        setResult(null);
+        setValidationMsg("Search failed. Please try again.");
       } finally {
         setIsSearching(false);
       }
@@ -37,8 +55,6 @@ export default function PlateSearchBox() {
 
     return () => clearTimeout(handler);
   }, [searchKey]);
-
-  console.log(searchKey);
 
   return (
     <>
@@ -72,7 +88,9 @@ export default function PlateSearchBox() {
                 <span className="loading loading-dots loading-xs text-primary"></span>
               ) : (
                 <span>
-                  {validationMsg && !result ? validationMsg : result}{" "}
+                  {validationMsg && !result
+                    ? validationMsg
+                    : result && result.location}{" "}
                 </span>
               )}
 
@@ -92,7 +110,7 @@ export default function PlateSearchBox() {
       </div>
       <dialog id="details_module" className="modal">
         <div className="modal-box w-9/12 max-w-3xl">
-          <PlateDetails />
+          <PlateDetails plateNumber={result?.plate} />
         </div>
         <form method="dialog" className="modal-backdrop">
           <button>close</button>

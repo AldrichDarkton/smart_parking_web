@@ -1,6 +1,6 @@
 import { motion } from "framer-motion";
 import { useNavigate } from "react-router";
-import { MapPin, ParkingSquare, ArrowUpRight } from "lucide-react";
+import { MapPin } from "lucide-react";
 
 export default function ZoneBlock({
   zoneName,
@@ -68,7 +68,7 @@ export default function ZoneBlock({
       {/* Zone details */}
       <div className="flex flex-col gap-4 p-4 pt-3">
         {/* Capacity */}
-        <div className="flex items-center justify-between gap-2">
+        {/* <div className="flex items-center justify-between gap-2">
           <div className="flex items-center gap-2 min-w-0">
             <div className="flex items-center justify-center rounded-lg bg-primary/10 text-primary w-9 h-9 shrink-0">
               <ParkingSquare className="w-5 h-5" />
@@ -80,7 +80,7 @@ export default function ZoneBlock({
               </p>
             </div>
           </div>
-        </div>
+        </div> */}
 
         {/* Occupancy summary */}
         <div className="flex items-end justify-between gap-2">
@@ -117,12 +117,12 @@ export default function ZoneBlock({
         </div>
 
         {/* View details */}
-        <div className="flex items-center justify-between border-t border-base-300 pt-3">
+        {/* <div className="flex items-center justify-between border-t border-base-300 pt-3">
           <span className="text-sm font-semibold text-base-content/70">
             View zone details
           </span>
           <ArrowUpRight className="w-4 h-4 text-primary" />
-        </div>
+        </div> */}
       </div>
     </motion.div>
   );
