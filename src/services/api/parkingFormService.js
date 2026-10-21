@@ -2,9 +2,13 @@ import axios from "axios";
 import {
   deleteAccount,
   deleteVehicle,
+  editAccount,
+  editVehicle,
   findCar,
+  forceExit,
   getAccounts,
   getLiveSlots,
+  getLogHistory,
   getVehicles,
   login,
   logout,
@@ -154,10 +158,32 @@ export const handleRegisterVehicle = async ({
   }
 };
 
+export const handleEditVehicles = async (vehicleId, vehicleData) => {
+  try {
+    const res = await editVehicle(vehicleId, vehicleData);
+    return formatResponsePackage({ response: res.data });
+  } catch (err) {
+    const { message, errors } = getErrorMessage(err);
+
+    if (axios.isAxiosError(err)) {
+      console.error("Logout API error:", {
+        status: err.response?.status,
+        data: err.response?.data,
+      });
+    } else {
+      console.error("Unexpected logout error:", err);
+    }
+
+    return formatResponsePackage({
+      isSuccess: false,
+      response: { message, errors },
+    });
+  }
+};
+
 export const handleDeleteVehicle = async (vehicleId) => {
   try {
     const res = await deleteVehicle(vehicleId);
-    console.log(res.data);
     return formatResponsePackage({ response: res.data });
   } catch (err) {
     const { message, errors } = getErrorMessage(err);
@@ -230,6 +256,29 @@ export const handleRegisterAccount = async ({ username, password, role }) => {
   }
 };
 
+export const handleEditAccount = async (accountId, accountData) => {
+  try {
+    const res = await editAccount(accountId, accountData);
+    return formatResponsePackage({ response: res.data });
+  } catch (err) {
+    const { message, errors } = getErrorMessage(err);
+
+    if (axios.isAxiosError(err)) {
+      console.error("Logout API error:", {
+        status: err.response?.status,
+        data: err.response?.data,
+      });
+    } else {
+      console.error("Unexpected logout error:", err);
+    }
+
+    return formatResponsePackage({
+      isSuccess: false,
+      response: { message, errors },
+    });
+  }
+};
+
 export const handleDeleteAccount = async (accountId) => {
   try {
     const res = await deleteAccount(accountId);
@@ -276,5 +325,51 @@ export const handleFindCar = async (plateNumber, { setIsLoading } = {}) => {
     });
   } finally {
     setIsLoading?.(false);
+  }
+};
+
+export const handleGetHistory = async () => {
+  try {
+    const res = await getLogHistory();
+    return formatResponsePackage({ response: res.data });
+  } catch (err) {
+    const { message, errors } = getErrorMessage(err);
+
+    if (axios.isAxiosError(err)) {
+      console.error("Logout API error:", {
+        status: err.response?.status,
+        data: err.response?.data,
+      });
+    } else {
+      console.error("Unexpected logout error:", err);
+    }
+
+    return formatResponsePackage({
+      isSuccess: false,
+      response: { message, errors },
+    });
+  }
+};
+
+export const handleForceExit = async (logId) => {
+  try {
+    const res = await forceExit(logId);
+    return formatResponsePackage({ response: res.data });
+  } catch (err) {
+    const { message, errors } = getErrorMessage(err);
+
+    if (axios.isAxiosError(err)) {
+      console.error("Force exit API error:", {
+        status: err.response?.status,
+        data: err.response?.data,
+      });
+    } else {
+      console.error("Unexpected force exit error:", err);
+    }
+
+    return formatResponsePackage({
+      isSuccess: false,
+      response: { message, errors },
+    });
   }
 };

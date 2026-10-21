@@ -1,48 +1,80 @@
 import { CarFront } from "lucide-react";
 import { useEffect, useState } from "react";
-import { handleRegisterVehicle } from "../services/api/parkingFormService";
+import {
+  handleEditVehicles,
+  handleRegisterVehicle,
+} from "../services/api/parkingFormService";
+import { useNotiStore } from "../store/notiStore";
 
-export default function MemberForm({ memberId, handleMemberSaveSuccess }) {
+export default function MemberForm({ memberData, handleMemberSaveSuccess }) {
   const [plateNumber, setPlateNumber] = useState("");
   const [ownerName, setOwnerName] = useState("");
   const [note, setNote] = useState("");
   const [isEdit, setIsEdit] = useState(false);
   const [selectedMember, setSelectedMember] = useState(null);
 
+  const { setNoti } = useNotiStore.getState();
+
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    const response = await handleRegisterVehicle({
-      plate_number: plateNumber,
-      owner_name: ownerName,
-      notes: note,
-    });
+    let response;
+
+    if (isEdit) {
+      const formatUpdateData = {
+        plate_number: plateNumber,
+        owner_name: ownerName,
+        notes: note,
+      };
+
+      response = await handleEditVehicles(selectedMember.id, formatUpdateData);
+    } else {
+      response = await handleRegisterVehicle({
+        plate_number: plateNumber,
+        owner_name: ownerName,
+        notes: note,
+      });
+    }
 
     if (response.isSuccess) {
+      setNoti(
+        "success",
+        `Member ${isEdit ? "edited" : "registered"} successfully.`,
+      );
       handleMemberSaveSuccess();
     } else {
+      setNoti("error", response.body.message);
       console.log(response.body.message);
     }
   };
 
   const resetData = () => {
-    setPlateNumber("");
-    setOwnerName("");
-    setNote("");
+    setPlateNumber(isEdit ? selectedMember.plate_number : "");
+    setOwnerName(isEdit ? selectedMember.owner_name : "");
+    setNote(isEdit ? selectedMember.notes : "");
   };
 
   useEffect(() => {
     const retrieveMember = async () => {
-      if (memberId) {
+      if (memberData) {
         setIsEdit(true);
-        // This is where I'll fetch the data
+        setSelectedMember(memberData);
+
+        setPlateNumber(memberData.plate_number ?? "");
+        setOwnerName(memberData.owner_name ?? "");
+        setNote(memberData.notes ?? "");
       } else {
         setIsEdit(false);
+        setSelectedMember(null);
+
+        setPlateNumber("");
+        setOwnerName("");
+        setNote("");
       }
     };
 
     retrieveMember();
-  }, [memberId]);
+  }, [memberData]);
 
   return (
     <div className="w-full sm:w-100 h-fit p-4 rounded-lg bg-card ">

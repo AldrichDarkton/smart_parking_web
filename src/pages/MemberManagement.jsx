@@ -5,12 +5,15 @@ import {
   handleDeleteVehicle,
   handleGetRegisteredVehicles,
 } from "../services/api/parkingFormService";
+import { useNotiStore } from "../store/notiStore";
 
 export default function MemberManagement() {
   const [searchKey, setSearchKey] = useState("");
   const [vehicleList, setVehicleList] = useState([]);
   const [selectedMember, setSelectedMember] = useState(null);
   const [selectedDeleteMemberId, setSelectedDeleteMemberId] = useState(null);
+
+  const { setNoti } = useNotiStore.getState();
 
   const [currentPage, setCurrentPage] = useState(1);
 
@@ -24,8 +27,8 @@ export default function MemberManagement() {
     formDialogRef.current?.showModal();
   };
 
-  const openEditForm = (memberId) => {
-    setSelectedMember(memberId);
+  const openEditForm = (member) => {
+    setSelectedMember(member);
     setFormKey((prev) => prev + 1);
     formDialogRef.current?.showModal();
   };
@@ -37,12 +40,13 @@ export default function MemberManagement() {
 
   const doDelete = async () => {
     const response = await handleDeleteVehicle(selectedDeleteMemberId);
-    console.log(response);
 
     if (response.isSuccess) {
       doInitializeData();
+      setNoti("success", "Member deleted successfully.");
       deleteDialogRef.current?.close();
     } else {
+      setNoti("error", response.body.message);
       console.log(response.body.message);
     }
   };
@@ -53,6 +57,7 @@ export default function MemberManagement() {
     if (response.isSuccess) {
       setVehicleList(response.body.vehicles);
     } else {
+      setNoti("error", response.body.message);
       console.log(response.body.message);
     }
   }, []);
@@ -173,7 +178,7 @@ export default function MemberManagement() {
                           <button
                             type="button"
                             className="btn btn-soft btn-primary"
-                            onClick={() => openEditForm(vehicle.licensePlate)}
+                            onClick={() => openEditForm(vehicle)}
                           >
                             <Pencil className="w-5 h-5" aria-hidden="true" />
                             <span>Edit</span>
@@ -252,7 +257,7 @@ export default function MemberManagement() {
           <p className="py-4">Are you sure you want to delete this member?</p>
           <div className="modal-action">
             <form method="dialog">
-              <button className="btn btn-error" onClick={() => doDelete()}>
+              <button className="btn btn-error me-2" onClick={() => doDelete()}>
                 Delete
               </button>
 
@@ -270,7 +275,7 @@ export default function MemberManagement() {
           <MemberForm
             handleMemberSaveSuccess={handleMemberSaveSuccess}
             key={formKey}
-            memberId={selectedMember}
+            memberData={selectedMember}
           />
         </div>
         <form method="dialog" className="modal-backdrop">

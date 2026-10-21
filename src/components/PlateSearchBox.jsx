@@ -33,10 +33,7 @@ export default function PlateSearchBox() {
 
         setValidationMsg(null);
 
-        // Replace with your actual search method
         const response = await handleFindCar(trimmedKey);
-
-        console.log(response);
 
         if (response.isSuccess) {
           setResult(response.body);

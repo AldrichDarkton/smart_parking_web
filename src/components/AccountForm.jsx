@@ -1,48 +1,89 @@
 import { Pencil } from "lucide-react";
 import { useEffect, useState } from "react";
-import { handleRegisterAccount } from "../services/api/parkingFormService";
+import {
+  handleEditAccount,
+  handleRegisterAccount,
+} from "../services/api/parkingFormService";
+import { useNotiStore } from "../store/notiStore";
+import { useUserStore } from "../store/userStore";
 
-export default function AccountForm({ accountId, handleAccountSaveSuccess }) {
+export default function AccountForm({ accountData, handleAccountSaveSuccess }) {
   const [username, setUsername] = useState("");
   const [temporaryPassword, setTemporaryPassword] = useState("");
   const [accessLevel, setAccessLevel] = useState("operator");
   const [isEdit, setIsEdit] = useState(false);
   const [selectedAccount, setSelectedAccount] = useState(null);
 
+  const { setNoti } = useNotiStore.getState();
+  const { id } = useUserStore.getState();
+
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    const response = await handleRegisterAccount({
-      username: username,
-      password: temporaryPassword,
-      role: accessLevel,
-    });
+    let response;
+
+    if (isEdit) {
+      const formatUpdateData = {
+        username: username,
+        role: accessLevel,
+      };
+
+      if (temporaryPassword) {
+        formatUpdateData.password = temporaryPassword;
+      }
+
+      response = await handleEditAccount(selectedAccount.id, formatUpdateData);
+    } else {
+      response = await handleRegisterAccount({
+        username: username,
+        password: temporaryPassword,
+        role: accessLevel,
+      });
+    }
 
     if (response.isSuccess) {
-      handleAccountSaveSuccess();
+      setNoti(
+        "success",
+        `Account ${isEdit ? "edited" : "registered"} successfully.`,
+      );
+      if (id == selectedAccount?.id) {
+        handleAccountSaveSuccess({ updatedName: username });
+      } else {
+        handleAccountSaveSuccess();
+      }
     } else {
+      setNoti("error", response.body.message);
       console.log(response.body.message);
     }
   };
 
   const resetData = () => {
-    setUsername("");
+    setUsername(isEdit ? selectedAccount.username : "");
     setTemporaryPassword("");
-    setAccessLevel("Viewer");
+    setAccessLevel(isEdit ? selectedAccount.role : "operator");
   };
 
   useEffect(() => {
-    const setSelectedAccount = async () => {
-      if (accountId) {
+    const initializeData = async () => {
+      if (accountData) {
         setIsEdit(true);
-        // This is where I'll fetch the data
+        setSelectedAccount(accountData);
+
+        setUsername(accountData.username ?? "");
+        setTemporaryPassword("");
+        setAccessLevel(accountData.role ?? "operator");
       } else {
         setIsEdit(false);
+        setSelectedAccount(null);
+
+        setUsername("");
+        setTemporaryPassword("");
+        setAccessLevel("operator");
       }
     };
 
-    setSelectedAccount();
-  }, [accountId]);
+    initializeData();
+  }, [accountData]);
 
   return (
     <div className="w-full sm:w-100 h-fit p-4 rounded-lg  bg-card">
@@ -82,36 +123,60 @@ export default function AccountForm({ accountId, handleAccountSaveSuccess }) {
           />
         </fieldset>
 
-        <fieldset className="fieldset w-full">
-          <label className="label font-bold" htmlFor="temporary-password">
-            Temporary Password *
-          </label>
-          <input
-            type="password"
-            id="temporary-password"
-            className="input input-primary w-full"
-            placeholder="Enter a secure password"
-            value={temporaryPassword}
-            onChange={(e) => setTemporaryPassword(e.target.value)}
-            required
-          />
-        </fieldset>
+        {!isEdit && (
+          <fieldset className="fieldset w-full">
+            <label className="label font-bold" htmlFor="temporary-password">
+              Temporary Password *
+            </label>
+            <input
+              type="password"
+              id="temporary-password"
+              className="input input-primary w-full"
+              placeholder="Enter a secure password"
+              value={temporaryPassword}
+              onChange={(e) => setTemporaryPassword(e.target.value)}
+              required
+            />
+          </fieldset>
+        )}
 
-        <fieldset className="fieldset w-full">
-          <label className="label font-bold" htmlFor="access-level">
-            Role *
-          </label>
-          <select
-            id="access-level"
-            className="select select-primary w-full"
-            defaultValue="Viewer"
-            value={accessLevel}
-            onChange={(e) => setAccessLevel(e.target.value)}
-          >
-            <option value="operator">Operator (Read-Only Access)</option>
-            <option value="admin">Admin (Full Access)</option>
-          </select>
-        </fieldset>
+        {id != accountData?.id && isEdit && (
+          <fieldset className="fieldset w-full">
+            <label className="label font-bold" htmlFor="access-level">
+              Role *
+            </label>
+            <select
+              id="access-level"
+              className="select select-primary w-full"
+              defaultValue="Viewer"
+              value={accessLevel}
+              onChange={(e) => setAccessLevel(e.target.value)}
+            >
+              <option value="operator">Operator (Read-Only Access)</option>
+              <option value="admin">Admin (Full Access)</option>
+            </select>
+          </fieldset>
+        )}
+
+        {isEdit && (
+          <>
+            <hr class="border-t border-gray-300 my-4" />
+
+            <fieldset className="fieldset w-full">
+              <label className="label font-bold" htmlFor="temporary-password">
+                {id != accountData?.id ? "Reset" : "Change"} Password
+              </label>
+              <input
+                type="password"
+                id="temporary-password"
+                className="input input-primary w-full"
+                placeholder="Enter a new password"
+                value={temporaryPassword}
+                onChange={(e) => setTemporaryPassword(e.target.value)}
+              />
+            </fieldset>
+          </>
+        )}
 
         <div className="h-5"></div>
 
@@ -123,7 +188,7 @@ export default function AccountForm({ accountId, handleAccountSaveSuccess }) {
           onClick={() => resetData()}
           className="btn btn-accent mt-3"
         >
-          Clear
+          {isEdit ? "Undo" : "Clear"}
         </button>
       </form>
     </div>

@@ -17,6 +17,10 @@ export const getVehicles = () => api.get("/settings/vehicles");
 export const registerVehicle = (vehicleData) =>
   api.post("/settings/vehicles/add", vehicleData);
 
+// GET / vehicle edit
+export const editVehicle = (vehicleId, vehicleData) =>
+  api.put(`/settings/vehicles/edit/${vehicleId}`, vehicleData);
+
 // GET / vehicle delete
 export const deleteVehicle = (vehicleId) =>
   api.delete(`/settings/vehicles/delete/${vehicleId}`);
@@ -27,6 +31,10 @@ export const getAccounts = () => api.get("/settings/staff");
 // GET / staff register
 export const registerAccount = (accountData) =>
   api.post("/settings/staff/add", accountData);
+
+// GET / staff edit
+export const editAccount = (accountId, accountData) =>
+  api.patch(`/settings/staff/edit/${accountId}`, accountData);
 
 // GET / staff delete
 export const deleteAccount = (accountId) =>
@@ -43,6 +51,13 @@ export const findCar = (plateNumber) =>
     },
   });
 
+// GET / log_history
+export const getLogHistory = () => api.get("/history");
+
+// POST / force_exit
+export const forceExit = (id) => api.post(`/logs/${id}/force_exit`);
+
+//------------------------- NOT USED -------------------------
 // GET /status
 export const getParkingStatus = async () => {
   const response = await api.get("/status");

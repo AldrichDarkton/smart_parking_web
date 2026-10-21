@@ -5,12 +5,16 @@ import {
   handleDeleteAccount,
   handleGetAccounts,
 } from "../services/api/parkingFormService";
+import { useNotiStore } from "../store/notiStore";
+import { useUserStore } from "../store/userStore";
 
 export default function AccountManagement() {
   const [searchKey, setSearchKey] = useState("");
   const [personnelList, setPersonnelList] = useState([]);
   const [selectedAccount, setSelectedAccount] = useState(null);
   const [selectedDeleteAccountId, setSelectedDeleteAccountId] = useState(null);
+  const { setNoti } = useNotiStore.getState();
+  const { id } = useUserStore.getState();
 
   const [currentPage, setCurrentPage] = useState(1);
 
@@ -24,6 +28,7 @@ export default function AccountManagement() {
     if (response.isSuccess) {
       setPersonnelList(response.body.staff);
     } else {
+      setNoti("error", response.body.message);
       console.log(response.body.message);
     }
   }, []);
@@ -34,8 +39,8 @@ export default function AccountManagement() {
     formDialogRef.current?.showModal();
   };
 
-  const openEditForm = (accountId) => {
-    setSelectedAccount(accountId);
+  const openEditForm = (accountData) => {
+    setSelectedAccount(accountData);
     setFormKey((prev) => prev + 1);
     formDialogRef.current?.showModal();
   };
@@ -51,8 +56,10 @@ export default function AccountManagement() {
 
     if (response.isSuccess) {
       doInitializeData();
+      setNoti("success", "Account deleted successfully.");
       deleteDialogRef.current?.close();
     } else {
+      setNoti("error", response.body.message);
       console.log(response.body.message);
     }
   };
@@ -195,14 +202,14 @@ export default function AccountManagement() {
                             </span>
                           </td>
                           <td className="flex items-center w-fit justify-start gap-5">
-                            {person.id == 1 ? (
+                            {person.id == 1 || person.id == id ? (
                               <></>
                             ) : (
                               <>
                                 <button
                                   type="button"
                                   className="btn btn-soft btn-primary"
-                                  onClick={() => openEditForm(person.username)}
+                                  onClick={() => openEditForm(person)}
                                 >
                                   <Pencil
                                     className="w-5 h-5"
@@ -290,7 +297,7 @@ export default function AccountManagement() {
           <p className="py-4">Are you sure you want to delete this account?</p>
           <div className="modal-action">
             <form method="dialog">
-              <button onClick={() => doDelete()} className="btn btn-error">
+              <button onClick={() => doDelete()} className="btn btn-error me-2">
                 Delete
               </button>
               <button className="btn">Cancel</button>
@@ -306,7 +313,7 @@ export default function AccountManagement() {
         <div className="modal-box w-fit">
           <AccountForm
             key={formKey}
-            accountId={selectedAccount}
+            accountData={selectedAccount}
             handleAccountSaveSuccess={handleAccountSaveSuccess}
           />
         </div>

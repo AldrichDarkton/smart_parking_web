@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { motion } from "framer-motion";
 import {
   ShieldCheck,
@@ -10,12 +10,16 @@ import {
 } from "lucide-react";
 import { useNavigate } from "react-router";
 import { handleLogin } from "../services/api/parkingFormService";
+import Toast from "../components/Toast";
+import { useNotiStore } from "../store/notiStore";
 
 export default function Login() {
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState("");
+
+  const { setNoti } = useNotiStore.getState();
 
   const navigate = useNavigate();
 
@@ -31,6 +35,7 @@ export default function Login() {
     const response = await handleLogin(username.trim(), password);
 
     if (response.isSuccess) {
+      setNoti("success", `Welcome back ${username}!`);
       navigate("/dashboard");
     } else {
       setError(
@@ -38,6 +43,14 @@ export default function Login() {
       );
     }
   };
+
+  useEffect(() => {
+    const user = localStorage.getItem("user");
+
+    if (user !== null) {
+      navigate("/dashboard", { replace: true });
+    }
+  }, [navigate]);
 
   return (
     <main className="relative flex min-h-screen items-center justify-center overflow-hidden bg-background px-4 py-8">
@@ -214,6 +227,7 @@ export default function Login() {
           </motion.div>
         </div>
       </motion.section>
+      <Toast />
     </main>
   );
 }

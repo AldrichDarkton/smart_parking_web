@@ -14,6 +14,10 @@ import {
 import { handleLogout } from "../services/api/parkingFormService";
 import { useUserStore } from "../store/userStore";
 import { useParkingStore } from "../store/parkingStore";
+import { useEffect, useRef, useState } from "react";
+import { useNotiStore } from "../store/notiStore";
+import AccountForm from "./AccountForm";
+import { storeUserInfo } from "../services/helperServices";
 
 const sidebarVariants = {
   open: {
@@ -48,26 +52,59 @@ const iconLineVariants = {
 
 export default function SideBar({ isOpen, setIsOpen }) {
   // const { total, free, zone_list } = useParkingStore();
-  const { username, role } = useUserStore();
+  const { id, username, role } = useUserStore();
+  const [menuItems, setMenuItems] = useState([]);
 
+  const { setNoti } = useNotiStore.getState();
+
+  const formDialogRef = useRef(null);
   const navigate = useNavigate();
 
   const doLogout = async () => {
     const response = await handleLogout();
 
     if (response.isSuccess) {
+      setNoti("success", "You have been logged out successfully.");
       navigate("/login");
     } else {
       console.log(response.body.message);
     }
   };
 
-  const menuItems = [
-    { to: "/dashboard", Icon: Grid2X2, label: "Overview" },
-    { to: "/log_view", Icon: Logs, label: "Parking Log" },
-    { to: "/member_vehicles", Icon: CarFront, label: "Member Vehicles" },
-    { to: "/account_management", Icon: UserCog2, label: "Account Management" },
-  ];
+  const handleAccountSaveSuccess = async ({ updatedName }) => {
+    formDialogRef.current?.close();
+
+    useUserStore.getState().setUser(id, updatedName, role);
+    storeUserInfo({ id, username: updatedName, role });
+  };
+
+  useEffect(() => {
+    const setupMenuItems = async () => {
+      if (role === "admin") {
+        const menuList = [
+          { to: "/dashboard", Icon: Grid2X2, label: "Overview" },
+          { to: "/log_view", Icon: Logs, label: "Parking Log" },
+          { to: "/member_vehicles", Icon: CarFront, label: "Member Vehicles" },
+          {
+            to: "/account_management",
+            Icon: UserCog2,
+            label: "Account Management",
+          },
+        ];
+
+        setMenuItems(menuList);
+      } else if (role === "operator") {
+        const menuList = [
+          { to: "/dashboard", Icon: Grid2X2, label: "Overview" },
+          { to: "/log_view", Icon: Logs, label: "Parking Log" },
+        ];
+
+        setMenuItems(menuList);
+      }
+    };
+
+    setupMenuItems();
+  }, [role]);
 
   return (
     <div className="flex flex-row-reverse bg-background justify-start items-start h-screen overflow-hidden w-fit">
@@ -157,7 +194,10 @@ export default function SideBar({ isOpen, setIsOpen }) {
           transition={{ duration: 0.2 }}
           className="flex w-full items-center justify-between px-2 py-3 border-t-2 border-t-primary"
         >
-          <div className="flex items-center justify-start gap-2">
+          <div
+            className="flex items-center justify-start gap-2 cursor-pointer"
+            onClick={() => document.getElementById("form_module").showModal()}
+          >
             <div className="flex h-10 w-10 items-center justify-center rounded-full border-current bg-primary-light">
               <User className="w-5 h-5 text-primary" aria-hidden="true" />
             </div>
@@ -175,6 +215,18 @@ export default function SideBar({ isOpen, setIsOpen }) {
           />
         </motion.div>
       </motion.aside>
+
+      <dialog ref={formDialogRef} id="form_module" className=" modal ">
+        <div className="modal-box w-fit">
+          <AccountForm
+            accountData={{ id: id, username: username, role: role }}
+            handleAccountSaveSuccess={handleAccountSaveSuccess}
+          />
+        </div>
+        <form method="dialog" className="modal-backdrop">
+          <button>close</button>
+        </form>
+      </dialog>
 
       <dialog id="logout_model" className="modal">
         <div className="modal-box">

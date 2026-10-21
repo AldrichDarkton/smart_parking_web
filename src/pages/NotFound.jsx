@@ -123,7 +123,7 @@ export default function NotFound() {
 
           <button
             type="button"
-            onClick={() => navigate("/")}
+            onClick={() => navigate("/dashboard")}
             className="btn btn-primary gap-2 shadow-md"
           >
             <House className="h-4 w-4" />

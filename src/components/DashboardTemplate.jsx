@@ -1,15 +1,19 @@
 import { useEffect, useState } from "react";
-import { Outlet, useNavigate } from "react-router";
+import { Outlet, useLocation, useNavigate } from "react-router";
 import { getUserInfo } from "../services/helperServices";
 import SideBar from "./Sidebar";
 import { handleMonitorParking } from "../services/api/parkingFormService";
 import { useParkingStore } from "../store/parkingStore";
+import { useUserStore } from "../store/userStore";
+import Toast from "./Toast";
 
 export default function DashboardTemplate() {
   const [isOpen, setIsOpen] = useState(false);
   const [hideMainOnOpen, setHideMainOnOpen] = useState(false);
+  const { role } = useUserStore();
 
   const navigate = useNavigate();
+  const location = useLocation().pathname;
 
   useEffect(() => {
     const handleCheckUser = () => {
@@ -32,6 +36,20 @@ export default function DashboardTemplate() {
 
     return () => window.removeEventListener("resize", handleResize);
   }, [navigate]);
+
+  const adminRoutes = ["/member_vehicles", "/account_management"];
+
+  useEffect(() => {
+    if (role == "") return;
+
+    const isAdminRoute = adminRoutes.some(
+      (route) => location === route || location.startsWith(`${route}/`),
+    );
+
+    if (isAdminRoute && role !== "admin") {
+      navigate("/404", { replace: true });
+    }
+  }, [role, location, navigate]);
 
   useEffect(() => {
     let stopped = false;
@@ -93,6 +111,8 @@ export default function DashboardTemplate() {
       <div
         className={`w-full h-screen overflow-x-clip overflow-y-auto bg-background pe-10 relative`}
       >
+        {/* The toast goes here */}
+        <Toast />
         {isOpen && hideMainOnOpen ? <></> : <Outlet />}
         <div className="h-10"></div>
       </div>

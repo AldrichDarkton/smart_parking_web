@@ -3,7 +3,6 @@ import {
   CalendarDays,
   CarFront,
   Clock,
-  Image as ImageIcon,
   MapPin,
   UserRound,
 } from "lucide-react";
@@ -14,9 +13,13 @@ import { extractDateTime, extractLocation } from "../services/helperServices";
 
 export default function PlateDetails({ plateNumber }) {
   const [isLoading, setIsLoading] = useState(true);
-  const [plateDetails, setPlateDetails] = useState([]);
+  const [plateDetails, setPlateDetails] = useState({});
 
   useEffect(() => {
+    if (!plateNumber) {
+      return;
+    }
+
     const initializeData = async () => {
       const response = await handleFindCar(plateNumber, { setIsLoading });
 

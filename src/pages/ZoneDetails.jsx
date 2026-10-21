@@ -3,6 +3,7 @@ import { useEffect, useState } from "react";
 import { Car, ImageIcon, SquareParking } from "lucide-react";
 import CapacityProgressCard from "../components/CapacityProgressCard";
 import { useParkingStore } from "../store/parkingStore";
+import PlateDetails from "../components/PlateDetails";
 
 // Temp data
 // const zoneDataList = [
@@ -191,7 +192,7 @@ export default function ZoneDetails() {
         <span className="text-primary font-bold text-xl w-full">
           Parking Slots
         </span>
-        <div className="grid w-full px-1  grid-cols-[repeat(auto-fit,minmax(100px,1fr))] gap-3 lg:gap-4">
+        <div className="grid w-full px-1  grid-cols-[repeat(auto-fit,minmax(100px,100px))] gap-3 lg:gap-4">
           {zoneInfo.slots &&
             zoneInfo.slots.map((slot) => {
               return (
@@ -236,30 +237,50 @@ const OverviewCard = ({ value, title, subtitle, isFull = false }) => {
 
 const SlotBlock = ({ slotNo, plateNo, occupied }) => {
   return (
-    <div className="hover-3d w-25">
+    <>
       <div
-        className={`flex flex-col items-start justify-start h-18 w-25 min-w-0 rounded-md border border-primary ${occupied ? "bg-primary-light" : "bg-card"} py-1 px-3 shadow-sm shadow-gray-400/30 overflow-hidden`}
+        className="hover-3d w-25"
+        onClick={() =>
+          occupied &&
+          document.getElementById(`details_module${slotNo}`).showModal()
+        }
       >
-        <span className="shrink-0 font-bold text-primary">{slotNo}</span>
-        <div className="flex flex-col items-center justify-center w-full h-full">
-          {occupied ? (
-            <>
-              <Car className="shrink-0 text-2xl font-bold text-primary sm:text-3xl" />
-              <span className="text-xs text-base-content/60">{plateNo}</span>
-            </>
-          ) : (
-            <SquareParking className="shrink-0 text-2xl font-bold text-primary sm:text-3xl" />
-          )}
+        <div
+          className={`relative flex flex-col items-start justify-start h-18 w-25 min-w-0 rounded-md border border-primary ${occupied ? "bg-primary-light" : "bg-card"} py-1 px-3 shadow-sm shadow-gray-400/30 overflow-hidden`}
+        >
+          <span className="shrink-0 font-bold text-primary">{slotNo}</span>
+          <div
+            className={`flex flex-col items-center ${occupied ? "justify-start" : "justify-center"} w-full h-full`}
+          >
+            {occupied ? (
+              <>
+                <Car className="shrink-0 text-2xl font-bold text-primary sm:text-3xl" />
+                <span className="absolute w-full bg-primary text-center text-white rounded-tl-md rounded-tr-md bottom-0 text-xs">
+                  {plateNo}
+                </span>
+              </>
+            ) : (
+              <SquareParking className="shrink-0 text-2xl font-bold text-primary sm:text-3xl" />
+            )}
+          </div>
         </div>
+        <div></div>
+        <div></div>
+        <div></div>
+        <div></div>
+        <div></div>
+        <div></div>
+        <div></div>
+        <div></div>
       </div>
-      <div></div>
-      <div></div>
-      <div></div>
-      <div></div>
-      <div></div>
-      <div></div>
-      <div></div>
-      <div></div>
-    </div>
+      <dialog id={`details_module${slotNo}`} className="modal">
+        <div className="modal-box w-9/12 max-w-3xl">
+          <PlateDetails plateNumber={plateNo} />
+        </div>
+        <form method="dialog" className="modal-backdrop">
+          <button>close</button>
+        </form>
+      </dialog>
+    </>
   );
 };
