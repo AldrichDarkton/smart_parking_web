@@ -3,6 +3,7 @@ import {
   CalendarDays,
   CarFront,
   Clock,
+  ImageOff,
   MapPin,
   UserRound,
 } from "lucide-react";
@@ -46,12 +47,18 @@ export default function PlateDetails({ plateNumber }) {
       >
         {!isLoading && (
           <>
-            <img
-              src={plateDetails?.image_url}
-              alt="Registered vehicle"
-              // className="w-full object-contain  transition-transform duration-500 group-hover:scale-105"
-              className="h-full w-full object-cover object-bottom transition-transform duration-500 group-hover:scale-105"
-            />
+            {plateDetails.image_url ? (
+              <img
+                src={plateDetails?.image_url}
+                alt="Registered vehicle"
+                // className="w-full object-contain  transition-transform duration-500 group-hover:scale-105"
+                className="h-full w-full object-cover object-bottom transition-transform duration-500 group-hover:scale-105"
+              />
+            ) : (
+              <div className="w-full h-full flex items-center justify-center">
+                <ImageOff className="w-20 h-20 text-primary" />
+              </div>
+            )}
 
             <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-transparent to-transparent" />
 
@@ -93,7 +100,9 @@ export default function PlateDetails({ plateNumber }) {
                   PARKING ZONE
                 </p>
                 <p className="font-bold text-primary">
-                  {extractLocation(plateDetails?.location)?.zoneName}
+                  {extractLocation(plateDetails?.location)
+                    ? extractLocation(plateDetails?.location)?.zoneName
+                    : "--"}
                 </p>
               </>
             )}
@@ -104,7 +113,9 @@ export default function PlateDetails({ plateNumber }) {
           >
             <p className="text-xs text-base-content/60 mb-1">PARKING SLOT</p>
             <p className="font-bold text-primary">
-              {extractLocation(plateDetails?.location)?.slotName}
+              {extractLocation(plateDetails?.location)
+                ? extractLocation(plateDetails?.location)?.slotName
+                : "--"}
             </p>
           </div>
         </div>
@@ -127,9 +138,14 @@ export default function PlateDetails({ plateNumber }) {
               </div>
 
               <div className="flex flex-col min-w-0">
-                <span className="font-semibold truncate">Jack Grim</span>
+                <span className="font-semibold truncate">
+                  {plateDetails.owner}
+                </span>
                 <span className="text-xs text-base-content/60">
-                  Registered vehicle owner
+                  {plateDetails.owner != "Visitor"
+                    ? "Registered"
+                    : "Unregistered"}{" "}
+                  vehicle owner
                 </span>
               </div>
             </>

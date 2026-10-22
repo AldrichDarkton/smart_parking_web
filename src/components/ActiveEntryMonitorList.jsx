@@ -30,8 +30,8 @@ export default function ActiveEntryMonitorList() {
       <ul className="list-none p-0 m-0 divide-y divide-base-300/70 min-h-47 ">
         <AnimatePresence mode="popLayout">
           {active_logs.length > 0 ? (
-            active_logs.map((log, index) => (
-              <ActiveEntryListItem key={index} log={log} />
+            active_logs.map((log) => (
+              <ActiveEntryListItem key={log.id} log={log} />
             ))
           ) : (
             <motion.li
@@ -87,8 +87,9 @@ function ActiveEntryListItem({ log }) {
 
   const statusClass = statusStyles[status] ?? "badge-outline";
 
-  const doForceExit = async () => {
-    const response = await handleForceExit(log.id);
+  const doForceExit = async (forceId) => {
+    console.log(forceId);
+    const response = await handleForceExit(forceId);
 
     if (response.isSuccess) {
       console.log(response.body);
@@ -139,7 +140,7 @@ function ActiveEntryListItem({ log }) {
           <span
             className={`btn btn-error btn-ghost btn-sm shrink-0`}
             onClick={() =>
-              document.getElementById("force_exit_modal").showModal()
+              document.getElementById(`force_exit_modal_${log.id}`).showModal()
             }
           >
             Force Exit
@@ -147,7 +148,7 @@ function ActiveEntryListItem({ log }) {
         )}
       </motion.li>
 
-      <dialog id="force_exit_modal" className="modal">
+      <dialog id={`force_exit_modal_${log.id}`} className="modal">
         <div className="modal-box">
           <h3 className="font-bold text-lg">Force Exit Confirmation!</h3>
           <p className="py-4">
@@ -157,7 +158,7 @@ function ActiveEntryListItem({ log }) {
             <form method="dialog">
               <button
                 className="btn btn-error me-2"
-                onClick={() => doForceExit()}
+                onClick={() => doForceExit(log.id)}
               >
                 Force Exit
               </button>

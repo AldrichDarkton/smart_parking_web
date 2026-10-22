@@ -14,7 +14,7 @@ export default function AccountManagement() {
   const [selectedAccount, setSelectedAccount] = useState(null);
   const [selectedDeleteAccountId, setSelectedDeleteAccountId] = useState(null);
   const { setNoti } = useNotiStore.getState();
-  const { id } = useUserStore.getState();
+  const { id, username } = useUserStore.getState();
 
   const [currentPage, setCurrentPage] = useState(1);
 
@@ -52,7 +52,6 @@ export default function AccountManagement() {
 
   const doDelete = async () => {
     const response = await handleDeleteAccount(selectedDeleteAccountId);
-    console.log(response);
 
     if (response.isSuccess) {
       doInitializeData();
@@ -183,10 +182,14 @@ export default function AccountManagement() {
                           <td>
                             <div className="flex items-center gap-3">
                               <span className="w-7 h-7 rounded-md bg-primary-light text-primary flex items-center justify-center font-bold text-xs">
-                                {person.username.charAt(0).toUpperCase()}
+                                {person.id != id
+                                  ? person.username.charAt(0).toUpperCase()
+                                  : username.charAt(0).toUpperCase()}
                               </span>
                               <span className="font-medium">
-                                {person.username}
+                                {person.id != id
+                                  ? person.username
+                                  : username + " (You)"}
                               </span>
                             </div>
                           </td>

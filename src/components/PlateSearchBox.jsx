@@ -87,7 +87,9 @@ export default function PlateSearchBox() {
                 <span>
                   {validationMsg && !result
                     ? validationMsg
-                    : result && result.location}{" "}
+                    : result?.length == 7
+                      ? result.location
+                      : "Finding Spot"}{" "}
                 </span>
               )}
 
